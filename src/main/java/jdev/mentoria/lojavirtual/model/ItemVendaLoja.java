@@ -3,6 +3,7 @@ package jdev.mentoria.lojavirtual.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -16,22 +17,20 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "item_venda_loja")
-@SequenceGenerator(name = "seq_item_venda_loja", sequenceName =  "seq_item_venda_loja",allocationSize = 1,initialValue = 1)
-public class ItemVendaLoja  implements Serializable {
+@SequenceGenerator(name = "seq_item_venda_loja", sequenceName = "seq_item_venda_loja", allocationSize = 1, initialValue = 1)
+public class ItemVendaLoja implements Serializable {
 
-	
 	private static final long serialVersionUID = 5836091265854781820L;
-	
-	
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "seq_item_venda_loja")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_item_venda_loja")
 	private Long id;
-	
-	
+
+	@Column(nullable = false)
 	private Double quantidade;
-	
+
 	@ManyToOne
-	@JoinColumn(name = "produto_id",nullable = false,foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT,name = "produto_fk"))
+	@JoinColumn(name = "produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "produto_fk"))
 	private Produto produto;
 
 	@ManyToOne
@@ -86,7 +85,5 @@ public class ItemVendaLoja  implements Serializable {
 		ItemVendaLoja other = (ItemVendaLoja) obj;
 		return Objects.equals(id, other.id);
 	}
-	
-	
-	
+
 }

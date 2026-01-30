@@ -3,6 +3,7 @@ package jdev.mentoria.lojavirtual.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,20 +11,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
-
 @Entity
 @Table(name = "forma_pagamento")
-@SequenceGenerator(name = "seq_forma_pagamento", sequenceName =  "seq_forma_pagamento",allocationSize = 1,initialValue = 1)
-public class FormaPagamento  implements Serializable {
-
+@SequenceGenerator(name = "seq_forma_pagamento", sequenceName = "seq_forma_pagamento", allocationSize = 1, initialValue = 1)
+public class FormaPagamento implements Serializable {
 
 	private static final long serialVersionUID = 8121616111101967143L;
-	
-	
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "seq_forma_pagamento")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_forma_pagamento")
 	private Long id;
-	
+
+	@Column(nullable = false)
 	private String descricao;
 
 	public Long getId() {
@@ -58,7 +57,5 @@ public class FormaPagamento  implements Serializable {
 		FormaPagamento other = (FormaPagamento) obj;
 		return Objects.equals(id, other.id);
 	}
-	
-	
-	
+
 }
