@@ -1,0 +1,1 @@
+-- baseline: banco já existia antes do Flyway
