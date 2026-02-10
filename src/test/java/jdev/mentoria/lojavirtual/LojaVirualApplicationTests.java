@@ -1,6 +1,5 @@
 package jdev.mentoria.lojavirtual;
 
-import java.awt.MediaTracker;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -310,9 +309,10 @@ class LojaVirualApplicationTests extends TestCase {
 	 * ID - remove o registro - valida se a exclusão funcionou - testa busca
 	 * customizada por descrição
 	 * </p>
+	 * @throws ExcepetionLojaVirtual 
 	 */
 	@Test
-	void testCadastroAcesso() {
+	void testCadastroAcesso() throws ExcepetionLojaVirtual {
 
 		// ===================== CADASTRO DE UM ACESSO =====================
 
