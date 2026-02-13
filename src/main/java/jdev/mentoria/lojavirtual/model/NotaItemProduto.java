@@ -40,6 +40,10 @@ public class NotaItemProduto implements Serializable {
 	@JoinColumn(name = "nota_fiscal_compra_id",nullable = false,foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT,name = "nota_fiscal_compra_fk"))
 	private NotaFiscalCompra notaFiscalCompra;
 
+	@ManyToOne(targetEntity = Pessoa.class)
+	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	private Pessoa empresa;
+	
 
 	public Long getId() {
 		return id;
@@ -97,6 +101,16 @@ public class NotaItemProduto implements Serializable {
 			return false;
 		NotaItemProduto other = (NotaItemProduto) obj;
 		return Objects.equals(id, other.id);
+	}
+
+
+	public Pessoa getEmpresa() {
+		return empresa;
+	}
+
+
+	public void setEmpresa(Pessoa empresa) {
+		this.empresa = empresa;
 	}
 	
 	

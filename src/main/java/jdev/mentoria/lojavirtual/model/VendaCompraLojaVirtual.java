@@ -47,6 +47,11 @@ public class VendaCompraLojaVirtual implements Serializable {
 
 	private BigDecimal valorDesconto;
 
+	
+	@ManyToOne(targetEntity = Pessoa.class)
+	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	private Pessoa empresa;
+	
 	@ManyToOne
 	@JoinColumn(name = "form_Pagamento_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "forma_Pagamento_fk"))
 	private FormaPagamento formaPagamento;
@@ -180,6 +185,14 @@ public class VendaCompraLojaVirtual implements Serializable {
 			return false;
 		VendaCompraLojaVirtual other = (VendaCompraLojaVirtual) obj;
 		return Objects.equals(id, other.id);
+	}
+
+	public Pessoa getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(Pessoa empresa) {
+		this.empresa = empresa;
 	}
 	
 	

@@ -20,6 +20,7 @@ public class LojaVirualApplication {
 	public static void main(String[] args) {
 		
 		
+		
 		SpringApplication.run(LojaVirualApplication.class, args);
 	}
 

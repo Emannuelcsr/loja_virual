@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -42,6 +43,11 @@ public class NotaFiscalVenda implements Serializable {
 	public void setVendaCompraLojaVirtual(VendaCompraLojaVirtual vendaCompraLojaVirtual) {
 		this.vendaCompraLojaVirtual = vendaCompraLojaVirtual;
 	}
+	
+	
+	@ManyToOne(targetEntity = Pessoa.class)
+	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	private Pessoa empresa;
 
 	@OneToOne
 	@JoinColumn(name = "venda_Compra_Loja_Virtual_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "venda_Compra_Loja_Virtual_fk"))
@@ -118,4 +124,15 @@ public class NotaFiscalVenda implements Serializable {
 		return Objects.equals(id, other.id);
 	}
 
+	public Pessoa getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(Pessoa empresa) {
+		this.empresa = empresa;
+	}
+
+	
+	
+	
 }

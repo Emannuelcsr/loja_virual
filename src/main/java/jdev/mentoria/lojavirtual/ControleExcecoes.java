@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -90,7 +91,14 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler {
 				msg += objectError.getDefaultMessage() + "\n ";
 			}
 
-		} else {
+		}
+		if (ex instanceof HttpMessageNotReadableException) {
+
+			msg = "não esta sendo enviado dados para o BODY corpo da requisição";
+			
+		}
+
+		else {
 			// ------------------------------------------------------------
 			// CASO 2: Qualquer outro erro genérico
 			// ------------------------------------------------------------
@@ -223,57 +231,39 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler {
 		return root.getMessage();
 	}
 
-	
-	
-	
-	
-	
-    /**
-     * Trata exceções personalizadas do tipo {@link ExcepetionLojaVirtual}.
-     *
-     * <p>Esse método é acionado automaticamente pelo Spring sempre que uma
-     * {@code ExcepetionLojaVirtual} é lançada em qualquer controller da aplicação.</p>
-     *
-     * <p>Ele transforma a exceção em uma resposta HTTP padronizada, devolvendo
-     * um JSON com mensagem de erro e código HTTP, evitando que o front-end
-     * receba uma resposta genérica ou sem contexto.</p>
-     *
-     * @param ex Exceção personalizada lançada pela aplicação.
-     * @return ResponseEntity contendo um {@link ObjetoErroDTO} e o status HTTP 404.
-     */
-    @ExceptionHandler({ ExcepetionLojaVirtual.class })
-    public ResponseEntity<Object> HandleExcepetionCustom(ExcepetionLojaVirtual ex) {
+	/**
+	 * Trata exceções personalizadas do tipo {@link ExcepetionLojaVirtual}.
+	 *
+	 * <p>
+	 * Esse método é acionado automaticamente pelo Spring sempre que uma
+	 * {@code ExcepetionLojaVirtual} é lançada em qualquer controller da aplicação.
+	 * </p>
+	 *
+	 * <p>
+	 * Ele transforma a exceção em uma resposta HTTP padronizada, devolvendo um JSON
+	 * com mensagem de erro e código HTTP, evitando que o front-end receba uma
+	 * resposta genérica ou sem contexto.
+	 * </p>
+	 *
+	 * @param ex Exceção personalizada lançada pela aplicação.
+	 * @return ResponseEntity contendo um {@link ObjetoErroDTO} e o status HTTP 404.
+	 */
+	@ExceptionHandler({ ExcepetionLojaVirtual.class })
+	public ResponseEntity<Object> HandleExcepetionCustom(ExcepetionLojaVirtual ex) {
 
-        // Cria o DTO padrão de erro que será enviado ao cliente
-        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+		// Cria o DTO padrão de erro que será enviado ao cliente
+		ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
 
-        // Define a mensagem de erro com base na mensagem da exceção lançada
-        objetoErroDTO.setErro(ex.getMessage());
+		// Define a mensagem de erro com base na mensagem da exceção lançada
+		objetoErroDTO.setErro(ex.getMessage());
 
-        // Define manualmente o código HTTP e a descrição
-        objetoErroDTO.setCode("404 ==> Not Found");
+		// Define manualmente o código HTTP e a descrição
+		objetoErroDTO.setCode("404 ==> Not Found");
 
-        // Retorna a resposta HTTP com o DTO e o status NOT_FOUND
-        return new ResponseEntity<>(objetoErroDTO, HttpStatus.NOT_FOUND);
-    }
+		// Retorna a resposta HTTP com o DTO e o status NOT_FOUND
+		return new ResponseEntity<>(objetoErroDTO, HttpStatus.NOT_FOUND);
+	}
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 	/*
 	 * ===================== EXPLICAÇÃO DIDÁTICA =====================
 	 *

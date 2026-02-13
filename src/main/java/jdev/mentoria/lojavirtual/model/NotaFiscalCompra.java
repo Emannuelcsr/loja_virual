@@ -38,6 +38,12 @@ public class NotaFiscalCompra implements Serializable {
 
 	private String descricaoObs;
 
+	
+	@ManyToOne(targetEntity = Pessoa.class)
+	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	private Pessoa empresa;
+	
+	
 	  @Column(nullable = false)
 	private BigDecimal valorTotal;
 
@@ -153,6 +159,14 @@ public class NotaFiscalCompra implements Serializable {
 			return false;
 		NotaFiscalCompra other = (NotaFiscalCompra) obj;
 		return Objects.equals(id, other.id);
+	}
+
+	public Pessoa getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(Pessoa empresa) {
+		this.empresa = empresa;
 	}
 	
 	

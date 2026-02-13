@@ -28,6 +28,9 @@ public class ImplementacaoUserDetailsService implements UserDetailsService {
 			throw new UsernameNotFoundException("Usuario não foi encontrado");
 		}
 		
+		System.out.println("SENHA DO BANCO = " + usuario.getSenha());
+
+		
 		return new User(usuario.getLogin(), usuario.getPassword(), usuario.getAuthorities());
 	}
 

@@ -30,6 +30,10 @@ public class Endereco implements Serializable {
 
 	@Column(nullable = false)
 	private String ruaLogra;
+	
+	@ManyToOne(targetEntity = Pessoa.class)
+	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	private Pessoa empresa;
 
 	@Column(nullable = false)
 	private String cep;
@@ -153,4 +157,15 @@ public class Endereco implements Serializable {
 		return Objects.equals(id, other.id);
 	}
 
+	public Pessoa getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(Pessoa empresa) {
+		this.empresa = empresa;
+	}
+
+	
+	
+	
 }
