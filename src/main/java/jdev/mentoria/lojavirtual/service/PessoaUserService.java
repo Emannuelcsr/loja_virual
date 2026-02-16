@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
 import jdev.mentoria.lojavirtual.model.Usuario;
+import jdev.mentoria.lojavirtual.repository.PessoaFisicaRepository;
 import jdev.mentoria.lojavirtual.repository.PessoaRepository;
 import jdev.mentoria.lojavirtual.repository.UsuarioRepository;
 
@@ -55,7 +57,8 @@ public class PessoaUserService {
 	@Autowired
 	private PessoaRepository pessoaRepository;
 
-	
+	@Autowired
+	private PessoaFisicaRepository pessoaFisicaRepository;
 	
 	
 	
@@ -240,6 +243,155 @@ public class PessoaUserService {
 		
 		// Retorna a pessoa jurídica salva (com ou sem criação do usuário)
 		return pessoaJuridica;
+	}
+
+
+
+
+
+
+	public PessoaFisica salvarPessoaFisica(PessoaFisica pessoaFisica) {
+		
+				
+		// ------------------------------------------------------------
+		// 1) Ajusta os endereços para apontarem corretamente para a empresa
+		// ------------------------------------------------------------
+
+		// Percorre a lista de endereços da pessoa jurídica
+		for (int i = 0; i < pessoaFisica.getEnderecos().size(); i++) {
+
+			// Faz o endereço “apontar” para a pessoa (dono do endereço)
+			pessoaFisica.getEnderecos().get(i).setPessoa(pessoaFisica);
+
+			// Faz o endereço “apontar” para a empresa (empresa associada ao endereço)
+			pessoaFisica.getEnderecos().get(i).setEmpresa(pessoaFisica);
+		}
+
+		
+		
+		
+		
+		// ------------------------------------------------------------
+		// 2) Salva a Pessoa Jurídica no banco
+		// ------------------------------------------------------------
+
+		// Persiste a empresa e garante que o ID seja gerado
+		pessoaFisica = pessoaFisicaRepository.save(pessoaFisica);
+		
+		
+		
+		
+		
+		
+		
+		
+
+		// ------------------------------------------------------------
+		// 3) Verifica se já existe usuário para essa empresa
+		// ------------------------------------------------------------
+
+		// Procura um usuário vinculado à pessoa e ao e-mail (login)
+		Usuario usuarioPJ = usuarioRepository.findUserByPessoa(pessoaFisica.getId(), pessoaFisica.getEmail());
+
+		// Se não existir, cria um novo usuário com senha e acessos padrão
+		if (usuarioPJ == null) {
+
+			
+			
+			
+			
+			
+			// ------------------------------------------------------------
+			// 4) Cria o usuário de acesso da empresa
+			// ------------------------------------------------------------
+
+			usuarioPJ = new Usuario();
+
+			// Data em que a senha foi “atualizada” (útil para controle de expiração)
+			usuarioPJ.setDataAtualSenha(Calendar.getInstance().getTime());
+
+			// Define empresa e pessoa associadas ao usuário
+			usuarioPJ.setEmpresa(pessoaFisica);
+			usuarioPJ.setPessoa(pessoaFisica);
+
+			// Login será o e-mail da empresa
+			usuarioPJ.setLogin(pessoaFisica.getEmail());
+
+			
+			
+			
+			
+			
+			// ------------------------------------------------------------
+			// 5) Gera uma senha temporária e criptografa
+			// ------------------------------------------------------------
+
+			// Gera uma senha simples baseada no tempo atual (milissegundos)
+			String senha = "" + Calendar.getInstance().getTimeInMillis();
+
+			// Criptografa a senha com BCrypt (o ideal para senhas)
+			String senhaCrypt = new BCryptPasswordEncoder().encode(senha);
+
+			// Salva a senha criptografada no usuário
+			usuarioPJ.setSenha(senhaCrypt);
+
+			
+			
+			
+			
+			
+			// ------------------------------------------------------------
+			// 6) Salva o usuário e atribui o acesso padrão
+			// ------------------------------------------------------------
+
+			// Persiste o usuário no banco
+			usuarioPJ = usuarioRepository.save(usuarioPJ);
+
+			
+			
+			// Insere o acesso padrão para o usuário PJ (provavelmente uma ROLE específica)
+			usuarioRepository.insereAcessoUserPj(usuarioPJ.getId());
+			
+			
+			
+			
+			// ------------------------------------------------------------
+			// 7) Monta e envia e-mail com login e senha
+			// ------------------------------------------------------------
+
+			StringBuilder mensagemHtml = new StringBuilder();
+
+			mensagemHtml.append("<div style='font-family: Arial, sans-serif; font-size: 14px; color: #333;'>");
+
+			mensagemHtml.append("<h2 style='color: #2c3e50;'>Acesso à Loja Virtual</h2>");
+
+			mensagemHtml.append("<p>Segue abaixo seus dados de acesso:</p>");
+
+			mensagemHtml.append("<p>").append("<b>Login:</b> ").append(pessoaFisica.getEmail()).append("<br/>")
+					.append("<b>Senha:</b> ").append(senha).append("</p>");
+
+			mensagemHtml.append("<p style='margin-top:20px;'>")
+					.append("Recomendamos que você altere sua senha após o primeiro acesso.").append("</p>");
+
+			mensagemHtml.append("<p>Obrigado!<br/>Equipe Loja Virtual</p>");
+
+			mensagemHtml.append("</div>");
+
+			try {
+				// Envia o e-mail em HTML para o e-mail da empresa
+				emailService.enviarEmailHtml("Acesso gerado para loja virtual", mensagemHtml.toString(),
+						pessoaFisica.getEmail());
+			} catch (Exception e) {
+				// Se o e-mail falhar, imprime o erro, mas não impede o cadastro
+				e.printStackTrace();
+			}
+		}
+
+		
+		
+		
+		// Retorna a pessoa jurídica salva (com ou sem criação do usuário)
+		return pessoaFisica;
 	}
 
 	

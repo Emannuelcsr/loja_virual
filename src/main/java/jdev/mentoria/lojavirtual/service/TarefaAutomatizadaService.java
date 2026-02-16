@@ -21,7 +21,7 @@ public class TarefaAutomatizadaService {
 	@Autowired
 	private SendEmailService sendEmailService;
 	
-	@Scheduled(initialDelay = 2000,fixedDelay = 86400000)
+	//@Scheduled(initialDelay = 2000,fixedDelay = 86400000)
 	//@Scheduled(cron = "0 0 11 * * * ", zone = "America/Sao_Paulo")
 	public void notificaUserTrocaSenha() throws UnsupportedEncodingException, MessagingException, InterruptedException {
 
