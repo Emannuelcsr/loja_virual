@@ -32,6 +32,10 @@ public class PessoaController {
     @Autowired
     private PessoaRepository pessoaRepository;
 
+    
+    
+    
+    
     /**
      * Serviço que contém a regra de negócio para salvar
      * Pessoa Jurídica e criar usuário automaticamente.
@@ -39,6 +43,12 @@ public class PessoaController {
     @Autowired
     private PessoaUserService pessoaUserService;
 
+    
+    
+    
+    
+    
+    
     /**
      * Endpoint responsável por salvar uma Pessoa Jurídica.
      *
@@ -60,6 +70,10 @@ public class PessoaController {
             @RequestBody PessoaJuridica pessoaJuridica)
             throws ExcepetionLojaVirtual {
 
+    	
+    	
+    	
+    	
         // ------------------------------------------------------------
         // 1) Validação básica: objeto não pode ser nulo
         // ------------------------------------------------------------
@@ -67,6 +81,11 @@ public class PessoaController {
             throw new ExcepetionLojaVirtual("Pessoa juridica não pode ser NULL");
         }
 
+        
+        
+        
+        
+        
         // ------------------------------------------------------------
         // 2) Validação de CNPJ duplicado (apenas para novo cadastro)
         // ------------------------------------------------------------
@@ -77,18 +96,36 @@ public class PessoaController {
                     "Ja existe CNPJ cadastrado com o numero: " +
                             pessoaJuridica.getCnpj());
         }
+        
+        
+        
+        
+        
 
         // ------------------------------------------------------------
         // 3) Delegação da regra principal para a camada de serviço
         // ------------------------------------------------------------
         pessoaJuridica =
                 pessoaUserService.salvarPessoaJuridica(pessoaJuridica);
+        
+        
+        
+        
+        
 
         // ------------------------------------------------------------
         // 4) Retorno da resposta HTTP com status 200 (OK)
         // ------------------------------------------------------------
         return new ResponseEntity<>(pessoaJuridica, HttpStatus.OK);
     }
+    
+    
+    
+    
+    
+    
+    
+    
 
     /*
      * ===================== EXPLICAÇÃO DIDÁTICA =====================
