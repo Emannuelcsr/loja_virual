@@ -5,10 +5,12 @@ import java.util.Calendar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
 import jdev.mentoria.lojavirtual.model.Usuario;
+import jdev.mentoria.lojavirtual.model.dto.CepDto;
 import jdev.mentoria.lojavirtual.repository.PessoaFisicaRepository;
 import jdev.mentoria.lojavirtual.repository.PessoaRepository;
 import jdev.mentoria.lojavirtual.repository.UsuarioRepository;
@@ -396,6 +398,11 @@ public class PessoaUserService {
 
 	
 	
+	public CepDto consultaCep(String cep) {
+		
+		return new RestTemplate().getForEntity("https://viacep.com.br/ws/"+cep+"/json/", CepDto.class).getBody();
+		
+	}
 	
 	
 	

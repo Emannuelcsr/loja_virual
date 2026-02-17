@@ -3,15 +3,21 @@ package jdev.mentoria.lojavirtual.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import jdev.mentoria.lojavirtual.ExcepetionLojaVirtual;
+import jdev.mentoria.lojavirtual.model.Endereco;
 import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
+import jdev.mentoria.lojavirtual.model.dto.CepDto;
+import jdev.mentoria.lojavirtual.repository.EnderecoRepository;
 import jdev.mentoria.lojavirtual.repository.PessoaRepository;
+import jdev.mentoria.lojavirtual.repository.UsuarioRepository;
 import jdev.mentoria.lojavirtual.service.PessoaUserService;
 import jdev.mentoria.lojavirtual.util.ValidadorCNPJ;
 import jdev.mentoria.lojavirtual.util.ValidadorCPF;
@@ -33,6 +39,8 @@ import jdev.mentoria.lojavirtual.util.ValidadorCPF;
 @RestController
 public class PessoaController {
 
+	private final UsuarioRepository usuarioRepository;
+
 	/**
 	 * Repositório responsável por consultas diretas no banco relacionadas à
 	 * entidade PessoaJuridica.
@@ -46,6 +54,14 @@ public class PessoaController {
 	 */
 	@Autowired
 	private PessoaUserService pessoaUserService;
+
+	@Autowired
+
+	private EnderecoRepository enderecoRepository;
+
+	PessoaController(UsuarioRepository usuarioRepository) {
+		this.usuarioRepository = usuarioRepository;
+	}
 
 	/**
 	 * Endpoint responsável por salvar uma Pessoa Jurídica.
@@ -95,6 +111,40 @@ public class PessoaController {
 			throw new ExcepetionLojaVirtual("CNPJ : " + pessoaJuridica.getCnpj() + "não válido");
 		}
 
+		if (pessoaJuridica.getId() == null) {
+
+			for (int p = 0; p < pessoaJuridica.getEnderecos().size(); p++) {
+
+				CepDto cepDto = pessoaUserService.consultaCep(pessoaJuridica.getEnderecos().get(p).getCep());
+				pessoaJuridica.getEnderecos().get(p).setBairro(cepDto.getBairro());
+				pessoaJuridica.getEnderecos().get(p).setCidade(cepDto.getLocalidade());
+				pessoaJuridica.getEnderecos().get(p).setComplemtento(cepDto.getComplemento());
+				pessoaJuridica.getEnderecos().get(p).setRuaLogra(cepDto.getLogradouro());
+				pessoaJuridica.getEnderecos().get(p).setUf(cepDto.getUf());
+
+			}
+
+		} else {
+			for (int p = 0; p < pessoaJuridica.getEnderecos().size(); p++) {
+
+				Endereco enderecoTemp = enderecoRepository.findById(pessoaJuridica.getEnderecos().get(p).getId()).get();
+
+				if (!enderecoTemp.getCep().equals(pessoaJuridica.getEnderecos().get(p).getCep())) {
+
+					CepDto cepDto = pessoaUserService.consultaCep(pessoaJuridica.getEnderecos().get(p).getCep());
+
+					pessoaJuridica.getEnderecos().get(p).setBairro(cepDto.getBairro());
+					pessoaJuridica.getEnderecos().get(p).setCidade(cepDto.getLocalidade());
+					pessoaJuridica.getEnderecos().get(p).setComplemtento(cepDto.getComplemento());
+					pessoaJuridica.getEnderecos().get(p).setRuaLogra(cepDto.getLogradouro());
+					pessoaJuridica.getEnderecos().get(p).setUf(cepDto.getUf());
+
+				}
+
+			}
+
+		}
+
 		// ------------------------------------------------------------
 		// 3) Delegação da regra principal para a camada de serviço
 		// ------------------------------------------------------------
@@ -125,8 +175,7 @@ public class PessoaController {
 	 * @throws ExcepetionLojaVirtual caso alguma regra de negócio seja violada.
 	 */
 	@PostMapping(value = "/salvarpf")
-	public ResponseEntity<PessoaFisica> salvarPF(@RequestBody PessoaFisica pessoaFisica)
-			throws ExcepetionLojaVirtual {
+	public ResponseEntity<PessoaFisica> salvarPF(@RequestBody PessoaFisica pessoaFisica) throws ExcepetionLojaVirtual {
 
 		// ------------------------------------------------------------
 		// 1) Validação básica: objeto não pode ser nulo
@@ -143,8 +192,6 @@ public class PessoaController {
 			throw new ExcepetionLojaVirtual("Ja existe CPF cadastrado com o numero: " + pessoaFisica.getCpf());
 		}
 
-	
-
 		if (!ValidadorCPF.validar(pessoaFisica.getCpf())) {
 			throw new ExcepetionLojaVirtual("CNPJ : " + pessoaFisica.getCpf() + "não válido");
 		}
@@ -160,12 +207,14 @@ public class PessoaController {
 		return new ResponseEntity<>(pessoaFisica, HttpStatus.OK);
 	}
 
-	
-	
-	
-	
-	
-	
+	@GetMapping(value = "/consultacep/{cep}")
+	public ResponseEntity<CepDto> consultaCep(@PathVariable("cep") String cep) {
+
+		CepDto cepDto = pessoaUserService.consultaCep(cep);
+
+		return new ResponseEntity<CepDto>(cepDto, HttpStatus.OK);
+	}
+
 	/*
 	 * ===================== EXPLICAÇÃO DIDÁTICA =====================
 	 *
