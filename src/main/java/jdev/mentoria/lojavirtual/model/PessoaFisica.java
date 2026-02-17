@@ -2,6 +2,8 @@ package jdev.mentoria.lojavirtual.model;
 
 import java.util.Date;
 
+import org.hibernate.validator.constraints.br.CPF;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,6 +16,7 @@ public class PessoaFisica extends Pessoa {
 
 	private static final long serialVersionUID = 1L;
 	
+	@CPF(message = "Cpf esta invalido")
 	@Column(nullable = false)
 	private String cpf;
 

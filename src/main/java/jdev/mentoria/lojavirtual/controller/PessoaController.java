@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import jdev.mentoria.lojavirtual.ExcepetionLojaVirtual;
 import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
@@ -65,7 +66,7 @@ public class PessoaController {
 	 * @throws ExcepetionLojaVirtual caso alguma regra de negócio seja violada.
 	 */
 	@PostMapping(value = "/salvarpj")
-	public ResponseEntity<PessoaJuridica> salvarPJ(@RequestBody PessoaJuridica pessoaJuridica)
+	public ResponseEntity<PessoaJuridica> salvarPJ(@RequestBody @Valid PessoaJuridica pessoaJuridica)
 			throws ExcepetionLojaVirtual {
 
 		// ------------------------------------------------------------
