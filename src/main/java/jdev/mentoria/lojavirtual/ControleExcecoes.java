@@ -3,8 +3,10 @@ package jdev.mentoria.lojavirtual;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,277 +21,285 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import jdev.mentoria.lojavirtual.model.dto.ObjetoErroDTO;
+import jdev.mentoria.lojavirtual.service.SendEmailService;
 
 /**
- * Classe responsável por centralizar o tratamento de exceções da aplicação.
+ * Central de erros da API (o "guarda-chuva" de exceções).
  *
- * <p>
- * Quando algum Controller REST lança uma exceção (erro), esta classe intercepta
- * e transforma o erro em uma resposta HTTP padronizada, com um corpo (JSON)
- * contendo informações úteis para o front-end ou para o cliente da API.
- * </p>
+ * O que essa classe faz, bem direto:
+ * 1) Intercepta erros que acontecerem nos seus endpoints (controllers)
+ * 2) Converte esses erros em um JSON padrão (ObjetoErroDTO)
+ * 3) Devolve um HTTP status correto (400, 404, 409, 500...)
+ * 4) Tenta mandar um e-mail com o stacktrace do erro (sem atrapalhar a resposta)
  *
- * <p>
- * Isso evita respostas “cruas” (stacktrace no retorno) e garante que o sistema
- * sempre responda num formato previsível, por exemplo:
- * </p>
+ * Por que isso é útil:
+ * - O front-end sempre recebe um formato fixo de erro (dto.erro e dto.code)
+ * - Você não vaza stacktrace para o cliente
+ * - Você consegue ser avisado por e-mail quando der problema no servidor
  *
- * <p>
- * - erro: "Campo nome é obrigatório"<br>
- * - code: "400 ==> Bad Request"
- * </p>
- *
- * <p>
- * Em termos simples: essa classe é o “tradutor de erros” da sua API.
- * </p>
+ * Essa classe funciona porque:
+ * - @RestControllerAdvice faz o Spring "ouvir" exceções de qualquer controller
+ * - ResponseEntityExceptionHandler já tem um mecanismo padrão do Spring
+ *   para tratar várias exceções comuns; aqui você está customizando.
  */
 @RestControllerAdvice
 public class ControleExcecoes extends ResponseEntityExceptionHandler {
 
 	/**
-	 * Trata exceções genéricas do sistema (Exception, RuntimeException, Throwable).
-	 *
-	 * <p>
-	 * Este método é chamado quando acontece um erro e não existe um tratamento mais
-	 * específico. Ele também aproveita o tratamento de validação do Spring
-	 * (MethodArgumentNotValidException), para juntar todas as mensagens de erro de
-	 * validação e devolver em uma única resposta.
-	 * </p>
-	 *
-	 * @param ex         Exceção capturada durante a requisição.
-	 * @param body       Corpo da resposta (quando aplicável). Aqui quase sempre vem
-	 *                   null.
-	 * @param headers    Headers que podem ser devolvidos na resposta.
-	 * @param statusCode Status HTTP que o Spring determinou para o erro.
-	 * @param request    Contexto da requisição atual.
-	 *
-	 * @return ResponseEntity contendo um {@link ObjetoErroDTO} com mensagem e
-	 *         código HTTP.
+	 * Serviço responsável por enviar e-mails (ex: via SMTP).
+	 * Aqui ele é usado para notificar o dono do sistema quando ocorrer um erro.
 	 */
-	@ExceptionHandler({ Exception.class, RuntimeException.class, Throwable.class })
-	@Override
-	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers,
-			HttpStatusCode statusCode, WebRequest request) {
+	@Autowired
+	private SendEmailService sendEmailService;
 
-		// Cria o DTO que será devolvido para o cliente (front-end / consumidor da API)
+	/**
+	 * Tratamento "geral" do Spring para exceções que passam pelo pipeline do MVC.
+	 *
+	 * Quando esse método roda?
+	 * - Quando acontece algum erro durante a requisição e o Spring decide tratar
+	 *   usando o ResponseEntityExceptionHandler (classe pai).
+	 *
+	 * O que ele devolve:
+	 * - Um JSON (ObjetoErroDTO) com:
+	 *   - erro: a mensagem do erro, de forma "mostrável" pro front
+	 *   - code: "status ==> motivo" (ex: "400 ==> Bad Request")
+	 *
+	 * Regras de mensagem (msg):
+	 * 1) Se for erro de validação (@Valid), ele junta todas as mensagens.
+	 * 2) Se o BODY veio vazio / inválido (JSON mal formado), devolve uma mensagem fixa.
+	 * 3) Se for qualquer outro erro, usa ex.getMessage().
+	 *
+	 * Importante:
+	 * - Ele SEMPRE tenta mandar e-mail do stacktrace (enviarEmailErroSilencioso),
+	 *   mas se o e-mail falhar, isso NÃO pode quebrar a resposta da API.
+	 */
+	@Override
+	protected ResponseEntity<Object> handleExceptionInternal(
+			Exception ex,
+			@Nullable Object body,
+			HttpHeaders headers,
+			HttpStatusCode statusCode,
+			WebRequest request) {
+
+		// DTO que será retornado para o cliente (front-end) em formato JSON
 		ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
 
-		// Aqui vamos montar a mensagem final do erro
+		// Mensagem final que o cliente vai receber no campo "erro"
 		String msg = "";
 
-		// ------------------------------------------------------------
-		// CASO 1: Erros de validação (@Valid) no request
-		// ------------------------------------------------------------
+		// 1) Quando falha validação (@Valid) em DTOs do request
 		if (ex instanceof MethodArgumentNotValidException) {
 
-			// Pega a lista de erros de validação (ex: "nome é obrigatório", "email
-			// inválido", etc.)
-			List<ObjectError> list = ((MethodArgumentNotValidException) ex).getBindingResult().getAllErrors();
+			// Pega todos os erros de validação do request (um por campo inválido)
+			List<ObjectError> list = ((MethodArgumentNotValidException) ex)
+					.getBindingResult()
+					.getAllErrors();
 
-			// Junta todas as mensagens numa string só (uma por linha)
+			// Junta tudo em uma string (cada erro em uma linha)
 			for (ObjectError objectError : list) {
 				msg += objectError.getDefaultMessage() + "\n ";
 			}
 
-		}else if (ex instanceof HttpMessageNotReadableException) {
+		// 2) Quando o JSON do BODY está inválido ou não foi enviado corretamente
+		} else if (ex instanceof HttpMessageNotReadableException) {
 
 			msg = "não esta sendo enviado dados para o BODY corpo da requisição";
-			
-		}
 
-		else {
-			// ------------------------------------------------------------
-			// CASO 2: Qualquer outro erro genérico
-			// ------------------------------------------------------------
+		// 3) Qualquer outro caso: pega a mensagem padrão da exceção
+		} else {
 			msg = ex.getMessage();
 		}
 
-		// Monta uma descrição humana do status HTTP (ex: 400 ==> Bad Request)
+		// Pega um texto "humano" do status (ex: Bad Request, Not Found etc.)
 		String reason = (statusCode instanceof HttpStatus hs) ? hs.getReasonPhrase() : "";
 
-		// Preenche o DTO de erro com a mensagem e o "code"
+		// Preenche o DTO com a mensagem e com o código formatado
 		objetoErroDTO.setErro(msg);
 		objetoErroDTO.setCode(statusCode.value() + " ==> " + reason);
 
-		// Retorna a resposta com o DTO no corpo e o status que o Spring já definiu
+		// Tenta avisar por e-mail o stacktrace do erro (sem quebrar o retorno da API)
+		enviarEmailErroSilencioso(ex);
+
+		// Devolve o JSON + status HTTP que o Spring já definiu
 		return new ResponseEntity<>(objetoErroDTO, statusCode);
 	}
 
 	/**
-	 * Trata exceções relacionadas a integridade e constraints do banco de dados.
+	 * Tratamento específico para erros de integridade do banco.
 	 *
-	 * <p>
-	 * Aqui entram erros do tipo:
-	 * </p>
-	 * <p>
-	 * - violação de chave estrangeira (FK)<br>
-	 * - violação de unique (valor repetido)<br>
-	 * - tentativa de salvar null em campo NOT NULL<br>
-	 * - erros SQL gerais
-	 * </p>
+	 * Quando esse método roda?
+	 * - Quando o controller (ou service) estoura algum desses erros:
+	 *   - DataIntegrityViolationException (Spring)
+	 *   - ConstraintViolationException (Hibernate)
+	 *   - SQLException (SQL puro)
 	 *
-	 * <p>
-	 * Esse tratamento é separado porque esses erros são muito comuns em CRUDs e
-	 * normalmente o cliente precisa receber uma mensagem mais amigável, junto com
-	 * um status HTTP coerente (ex: 409 Conflict).
-	 * </p>
+	 * Ideia principal:
+	 * - Para esse tipo de erro, geralmente faz sentido devolver 409 (Conflict),
+	 *   porque a operação bateu numa regra do banco (FK, UNIQUE, NOT NULL etc.).
 	 *
-	 * @param ex Exceção capturada durante a operação no banco.
-	 * @return ResponseEntity com {@link ObjetoErroDTO} e status adequado.
+	 * O retorno é sempre um JSON padronizado (ObjetoErroDTO) usando o método build().
 	 */
 	@ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class, SQLException.class })
 	public ResponseEntity<Object> handleExceptionDataIntegrity(Exception ex) {
 
-		// DTO padrão de erro
+		// DTO que será devolvido no corpo da resposta
 		ObjetoErroDTO dto = new ObjetoErroDTO();
 
-		// Mensagem final que será mostrada ao cliente
+		// Mensagem que vai para dto.erro
 		String msg;
 
-		// ------------------------------------------------------------
-		// 1) Erro de integridade no Spring (geralmente vem do banco por baixo)
-		// ------------------------------------------------------------
+		// 1) Exceção do Spring relacionada a integridade (vem do banco por baixo)
 		if (ex instanceof DataIntegrityViolationException) {
 
-			// Pega a mensagem raiz (mais útil do que a mensagem “embrulhada”)
+			// rootMessage(ex) pega a causa mais profunda, geralmente com o detalhe real
 			msg = "Erro de integridade no banco: " + rootMessage(ex);
 
-			// 409 Conflict é típico quando a operação conflita com regras do banco
+			// Envia e-mail do erro, mas sem atrapalhar o retorno
+			enviarEmailErroSilencioso(ex);
+
+			// 409 porque a ação conflitou com uma regra do banco
 			return build(dto, msg, HttpStatus.CONFLICT);
 
-			// ------------------------------------------------------------
-			// 2) Erro de constraint no Hibernate (FK, UNIQUE, etc.)
-			// ------------------------------------------------------------
+		// 2) Exceção do Hibernate: constraint (FK, UNIQUE, etc.)
 		} else if (ex instanceof ConstraintViolationException) {
 
 			msg = "Erro de constraint: " + rootMessage(ex);
+			enviarEmailErroSilencioso(ex);
 			return build(dto, msg, HttpStatus.CONFLICT);
 
-			// ------------------------------------------------------------
-			// 3) Erro SQL direto
-			// ------------------------------------------------------------
+		// 3) SQL direto (às vezes dá pra considerar 500)
 		} else if (ex instanceof SQLException) {
 
 			msg = "Erro de SQL no banco: " + rootMessage(ex);
+			enviarEmailErroSilencioso(ex);
 			return build(dto, msg, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		// Caso caia aqui por algum motivo, devolve erro genérico
+		// Se cair aqui, devolve um 500 genérico
 		msg = ex.getMessage();
+		enviarEmailErroSilencioso(ex);
 		return build(dto, msg, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	/**
-	 * Monta uma resposta padrão de erro usando o {@link ObjetoErroDTO}.
+	 * Monta e devolve a resposta padrão no formato da sua API.
 	 *
-	 * <p>
-	 * Esse método existe para evitar repetição: várias exceções vão gerar o mesmo
-	 * formato de resposta (erro + code).
-	 * </p>
+	 * Isso evita repetição de código, porque vários handlers precisam devolver:
+	 * - dto.erro
+	 * - dto.code
+	 * - status HTTP
 	 *
-	 * @param dto    DTO que será preenchido e devolvido.
-	 * @param msg    Mensagem final do erro.
-	 * @param status Status HTTP que será usado na resposta.
-	 * @return ResponseEntity com DTO e status.
+	 * Exemplo de dto.code:
+	 * - "409 ==> Conflict"
 	 */
 	private ResponseEntity<Object> build(ObjetoErroDTO dto, String msg, HttpStatus status) {
 
-		// Define a mensagem de erro
+		// Mensagem que o front vai mostrar/usar
 		dto.setErro(msg);
 
-		// Define o "code" como "status ==> motivo"
+		// Código formatado para facilitar log/depuração no cliente
 		dto.setCode(status.value() + " ==> " + status.getReasonPhrase());
 
-		// Retorna a resposta montada
+		// Devolve o DTO com o status escolhido
 		return new ResponseEntity<>(dto, status);
 	}
 
 	/**
-	 * Recupera a mensagem raiz (root cause) de uma exceção.
+	 * Pega a mensagem da causa raiz (o "erro de verdade") de uma exceção.
 	 *
-	 * <p>
-	 * Muitas exceções vêm “encapsuladas” (uma dentro da outra). Esse método desce
-	 * até a última causa, que geralmente contém a mensagem mais útil para entender
-	 * o problema real.
-	 * </p>
+	 * Por que isso existe?
+	 * - Muitas exceções vêm "embrulhadas" (uma dentro da outra).
+	 * - A mensagem útil geralmente está lá no fundo, na última causa.
 	 *
-	 * @param ex Exceção inicial (pode conter várias causas).
-	 * @return String mensagem da causa raiz.
+	 * Exemplo:
+	 * - DataIntegrityViolationException (genérico)
+	 *   -> ConstraintViolationException
+	 *      -> PSQLException (a mensagem real do PostgreSQL)
+	 *
+	 * Esse método desce até a última causa e devolve o getMessage() dela.
 	 */
 	private String rootMessage(Throwable ex) {
 
-		// Começa pela exceção atual
 		Throwable root = ex;
 
-		// Enquanto houver uma causa, vai descendo até a última
+		// Desce até a última causa (a mais profunda)
 		while (root.getCause() != null && root.getCause() != root) {
 			root = root.getCause();
 		}
 
-		// Retorna a mensagem da causa mais profunda
 		return root.getMessage();
 	}
 
 	/**
-	 * Trata exceções personalizadas do tipo {@link ExcepetionLojaVirtual}.
+	 * Tratamento da sua exceção personalizada (ExcepetionLojaVirtual).
 	 *
-	 * <p>
-	 * Esse método é acionado automaticamente pelo Spring sempre que uma
-	 * {@code ExcepetionLojaVirtual} é lançada em qualquer controller da aplicação.
-	 * </p>
+	 * Quando usar isso?
+	 * - Quando você quer lançar um erro "da regra do seu sistema"
+	 *   (ex: "não encontrou pessoa", "acesso negado", etc.)
 	 *
-	 * <p>
-	 * Ele transforma a exceção em uma resposta HTTP padronizada, devolvendo um JSON
-	 * com mensagem de erro e código HTTP, evitando que o front-end receba uma
-	 * resposta genérica ou sem contexto.
-	 * </p>
-	 *
-	 * @param ex Exceção personalizada lançada pela aplicação.
-	 * @return ResponseEntity contendo um {@link ObjetoErroDTO} e o status HTTP 404.
+	 * Aqui você escolheu:
+	 * - Status 404 (Not Found)
+	 * - JSON padronizado no ObjetoErroDTO
 	 */
 	@ExceptionHandler({ ExcepetionLojaVirtual.class })
 	public ResponseEntity<Object> HandleExcepetionCustom(ExcepetionLojaVirtual ex) {
 
-		// Cria o DTO padrão de erro que será enviado ao cliente
 		ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
 
-		// Define a mensagem de erro com base na mensagem da exceção lançada
+		// Mensagem que você mesmo definiu ao lançar a exceção
 		objetoErroDTO.setErro(ex.getMessage());
 
-		// Define manualmente o código HTTP e a descrição
+		// Code manual fixo (você escolheu 404)
 		objetoErroDTO.setCode("404 ==> Not Found");
 
-		// Retorna a resposta HTTP com o DTO e o status NOT_FOUND
 		return new ResponseEntity<>(objetoErroDTO, HttpStatus.NOT_FOUND);
 	}
 
-	/*
-	 * ===================== EXPLICAÇÃO DIDÁTICA =====================
+	/**
+	 * Tratamento genérico para qualquer Exception não prevista.
 	 *
-	 * Essa classe existe para resolver um problema muito comum em APIs: quando
-	 * ocorre um erro, você não quer devolver um “erro feio”, stacktrace, ou uma
-	 * resposta inconsistente para o cliente.
+	 * Atenção:
+	 * - Esse handler pode "capturar tudo" que não foi pego pelos outros.
+	 * - Ele devolve sempre 500.
 	 *
-	 * Com @RestControllerAdvice, o Spring “escuta” todas as exceções que
-	 * acontecerem nos seus controllers e joga para cá.
-	 *
-	 * Aqui você tem dois grandes cenários:
-	 *
-	 * 1) Erros de validação (MethodArgumentNotValidException) Exemplo: você manda
-	 * um JSON inválido, um campo obrigatório vazio, tamanho menor que o permitido,
-	 * etc. Nesse caso, a classe junta todas as mensagens e devolve tudo de uma vez.
-	 *
-	 * 2) Erros do banco (DataIntegrityViolationException,
-	 * ConstraintViolationException, SQLException) Exemplo: tentar inserir valor
-	 * repetido, violar FK, salvar null em campo NOT NULL. Aqui a classe devolve 409
-	 * Conflict (quando faz sentido) ou 500 quando for erro mais grave.
-	 *
-	 * O ObjetoErroDTO é o formato padrão que você escolheu para o “corpo do erro”.
-	 * Isso é ótimo porque o front-end consegue tratar sempre do mesmo jeito: -
-	 * mostra dto.erro para o usuário - usa dto.code para log/depuração
-	 *
-	 * Em resumo: essa classe transforma exceções em respostas HTTP bem organizadas,
-	 * com mensagens melhores, e sem bagunça para quem está consumindo a API.
-	 * ===============================================================
+	 * Ele existe para garantir:
+	 * - Sempre voltar JSON padrão
+	 * - Sempre tentar mandar e-mail do erro
 	 */
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<Object> handleGenericException(Exception ex) {
+
+		ObjetoErroDTO dto = new ObjetoErroDTO();
+
+		dto.setErro(ex.getMessage());
+		dto.setCode("500 ==> Internal Server Error");
+
+		enviarEmailErroSilencioso(ex);
+
+		return new ResponseEntity<>(dto, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	/**
+	 * Envia e-mail com o stacktrace do erro, sem deixar a API falhar por causa disso.
+	 *
+	 * Por que "silencioso"?
+	 * - Se o e-mail falhar (senha errada, SMTP fora, destinatário inválido),
+	 *   isso NÃO pode derrubar a resposta do seu endpoint.
+	 *
+	 * O que vai no e-mail:
+	 * - Assunto: "Erro na loja virtual"
+	 * - Corpo: stacktrace completo (ExceptionUtils.getStackTrace(ex))
+	 * - Destinatário: seu e-mail fixo
+	 */
+	private void enviarEmailErroSilencioso(Exception ex) {
+		try {
+			sendEmailService.enviarEmailHtml(
+					"Erro na loja virtual",
+					ExceptionUtils.getStackTrace(ex),
+					"emannuelsouza@hotmail.com"
+			);
+		} catch (Exception ignored) {
+			// Ignora porque falha de e-mail não pode quebrar o retorno da API
+		}
+	}
 }
