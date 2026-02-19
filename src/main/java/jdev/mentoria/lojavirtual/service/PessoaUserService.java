@@ -11,6 +11,7 @@ import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
 import jdev.mentoria.lojavirtual.model.Usuario;
 import jdev.mentoria.lojavirtual.model.dto.CepDto;
+import jdev.mentoria.lojavirtual.model.dto.ConsultaCnpjDto;
 import jdev.mentoria.lojavirtual.repository.PessoaFisicaRepository;
 import jdev.mentoria.lojavirtual.repository.PessoaRepository;
 import jdev.mentoria.lojavirtual.repository.UsuarioRepository;
@@ -404,6 +405,12 @@ public class PessoaUserService {
 		
 	}
 	
+	
+	public ConsultaCnpjDto consultaCnpj(String cnpj) {
+	    return new RestTemplate()
+	        .getForEntity("https://receitaws.com.br/v1/cnpj/" + cnpj, ConsultaCnpjDto.class)
+	        .getBody();
+	}
 	
 	
 	

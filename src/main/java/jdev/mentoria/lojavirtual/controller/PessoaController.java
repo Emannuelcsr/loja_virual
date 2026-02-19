@@ -13,15 +13,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import jdev.mentoria.lojavirtual.ExcepetionLojaVirtual;
+import jdev.mentoria.lojavirtual.enums.TipoPessoa;
 import jdev.mentoria.lojavirtual.model.Endereco;
 import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
 import jdev.mentoria.lojavirtual.model.dto.CepDto;
+import jdev.mentoria.lojavirtual.model.dto.ConsultaCnpjDto;
 import jdev.mentoria.lojavirtual.repository.EnderecoRepository;
 import jdev.mentoria.lojavirtual.repository.PessoaFisicaRepository;
 import jdev.mentoria.lojavirtual.repository.PessoaRepository;
 import jdev.mentoria.lojavirtual.repository.UsuarioRepository;
 import jdev.mentoria.lojavirtual.service.PessoaUserService;
+import jdev.mentoria.lojavirtual.service.ServiceContagemApi;
 import jdev.mentoria.lojavirtual.util.ValidadorCNPJ;
 import jdev.mentoria.lojavirtual.util.ValidadorCPF;
 
@@ -43,6 +46,9 @@ import jdev.mentoria.lojavirtual.util.ValidadorCPF;
 public class PessoaController {
 
 	private final UsuarioRepository usuarioRepository;
+
+	@Autowired
+	private ServiceContagemApi serviceContagemApi;
 
 	/**
 	 * Repositório responsável por consultas diretas no banco relacionadas à
@@ -73,6 +79,8 @@ public class PessoaController {
 
 		List<PessoaFisica> pessoaFisicas = pessoaFisicaRepository.pesquisaPorNomePF(nome.trim().toUpperCase());
 
+		serviceContagemApi.atualizaAcessoEndPointPF();
+
 		return new ResponseEntity<List<PessoaFisica>>(pessoaFisicas, HttpStatus.OK);
 
 	}
@@ -86,7 +94,6 @@ public class PessoaController {
 
 	}
 
-	
 	@GetMapping(value = "/consultaPJporNome/{nome}")
 	public ResponseEntity<List<PessoaJuridica>> consultaPJporNome(@PathVariable("nome") String nome) {
 
@@ -95,8 +102,7 @@ public class PessoaController {
 		return new ResponseEntity<List<PessoaJuridica>>(pessoaJuridicas, HttpStatus.OK);
 
 	}
-	
-	
+
 	@GetMapping(value = "/consultaPJporCnpj/{cnpj}")
 	public ResponseEntity<List<PessoaJuridica>> consultaPJporCnpj(@PathVariable("cnpj") String cnpj) {
 
@@ -105,8 +111,7 @@ public class PessoaController {
 		return new ResponseEntity<List<PessoaJuridica>>(pessoaJuridicas, HttpStatus.OK);
 
 	}
-	
-	
+
 	/**
 	 * Endpoint responsável por salvar uma Pessoa Jurídica.
 	 *
@@ -134,6 +139,11 @@ public class PessoaController {
 		// ------------------------------------------------------------
 		if (pessoaJuridica == null) {
 			throw new ExcepetionLojaVirtual("Pessoa juridica não pode ser NULL");
+		}
+
+		if (pessoaJuridica.getTipoPessoa() == null) {
+
+			throw new ExcepetionLojaVirtual("Informe o tipo: Juridico ou Fornecedor");
 		}
 
 		// ------------------------------------------------------------
@@ -228,6 +238,12 @@ public class PessoaController {
 			throw new ExcepetionLojaVirtual("Pessoa fisica não pode ser NULL");
 		}
 
+		
+		if(pessoaFisica.getTipoPessoa() == null) {
+			
+			pessoaFisica.setTipoPessoa(TipoPessoa.FISICA.name());
+		}
+		
 		// ------------------------------------------------------------
 		// 2) Validação de CPF duplicado (apenas para novo cadastro)
 		// ------------------------------------------------------------
@@ -259,6 +275,16 @@ public class PessoaController {
 		return new ResponseEntity<CepDto>(cepDto, HttpStatus.OK);
 	}
 
+	@GetMapping(value = "/consultacnpj/{cnpj}")
+	public ResponseEntity<ConsultaCnpjDto> consultaCnpj(@PathVariable("cnpj") String cnpj) {
+
+		ConsultaCnpjDto consultaCnpjDto = pessoaUserService.consultaCnpj(cnpj);
+
+		return new ResponseEntity<ConsultaCnpjDto>(consultaCnpjDto, HttpStatus.OK);
+	}
+	
+	
+	
 	/*
 	 * ===================== EXPLICAÇÃO DIDÁTICA =====================
 	 *
