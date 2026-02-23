@@ -2,17 +2,22 @@ package jdev.mentoria.lojavirtual.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -33,48 +38,42 @@ public class Produto implements Serializable {
 	@Column(nullable = false)
 	private String tipoUnidade;
 
-	@Size(min = 10, message =  "Nome do produto deve ter no mínimo 10 letras")
+	@Size(min = 10, message = "Nome do produto deve ter no mínimo 10 letras")
 	@NotNull(message = "Nome do produto deve ser informado")
 	@Column(nullable = false)
 	private String nome;
 
 	@NotNull(message = "Descrição do produto deve ser informado")
-	@Column(columnDefinition = "text", length = 2000,nullable = false)
+	@Column(columnDefinition = "text", length = 2000, nullable = false)
 	private String descricao;
 
 	private String linkYoutube;
-	
+
 	@NotNull(message = "A empresa responsavel deve ser informado")
 	@ManyToOne(targetEntity = PessoaJuridica.class)
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
-	
+
 	@NotNull(message = "A categoria do produto deve ser informada")
 	@ManyToOne(targetEntity = CategoriaProduto.class)
 	@JoinColumn(name = "categoria_produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "categoria_produto_fk"))
 	private CategoriaProduto categoriaProduto;
-	
-	
+
 	@NotNull(message = "A marca do produto deve ser informada")
 	@ManyToOne(targetEntity = MarcaProduto.class)
 	@JoinColumn(name = "marca_produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "marca_produto_fk"))
 	private MarcaProduto marcaProduto;
-	
-	@NotNull(message = "A nota item do produto deve ser informada")
-	@ManyToOne(targetEntity = NotaItemProduto.class)
-	@JoinColumn(name = "nota_item_produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "nota_item_produto_fk"))
-	private NotaItemProduto notaItemProduto ;
-	
-	
+
+	@OneToMany(mappedBy = "produto", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<ImagemProduto> imagemProdutos = new ArrayList<ImagemProduto>();
+
 	@Column(nullable = false)
 	private Boolean ativo = Boolean.TRUE;
 
-	
 	@NotNull(message = "O peso do produto deve ser informado")
 	@Column(nullable = false)
 	private Double peso;
-	
+
 	@NotNull(message = "A largura do produto deve ser informado")
 	@Column(nullable = false)
 	private Double largura;
@@ -87,7 +86,6 @@ public class Produto implements Serializable {
 	@Column(nullable = false)
 	private Double profundidade;
 
-	
 	@NotNull(message = "O valor de venda do produto deve ser informado")
 	@Column(nullable = false)
 	private BigDecimal valorVenda = BigDecimal.ZERO;
@@ -97,7 +95,6 @@ public class Produto implements Serializable {
 
 	private Integer quantidadeAlertaEstoque = 0;
 
-	
 	private Boolean alertaQuantidadeEstoque = Boolean.FALSE;
 
 	private Integer quantidadeClick = 0;
@@ -214,8 +211,6 @@ public class Produto implements Serializable {
 		this.quantidadeClick = quantidadeClick;
 	}
 
-	
-	
 	public Boolean getAtivo() {
 		return ativo;
 	}
@@ -265,15 +260,12 @@ public class Produto implements Serializable {
 		this.marcaProduto = marcaProduto;
 	}
 
-	public NotaItemProduto getNotaItemProduto() {
-		return notaItemProduto;
+	public List<ImagemProduto> getImagemProdutos() {
+		return imagemProdutos;
 	}
 
-	public void setNotaItemProduto(NotaItemProduto notaItemProduto) {
-		this.notaItemProduto = notaItemProduto;
+	public void setImagemProdutos(List<ImagemProduto> imagemProdutos) {
+		this.imagemProdutos = imagemProdutos;
 	}
 
-	
-	
-	
 }
