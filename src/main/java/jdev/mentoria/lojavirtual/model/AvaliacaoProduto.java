@@ -14,12 +14,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "avaliacao_Produto")
 @SequenceGenerator(name = "seq_avaliacao_Produto", sequenceName = "seq_avaliacao_Produto", allocationSize = 1, initialValue = 1)
 public class AvaliacaoProduto implements Serializable {
-
 
 	/**
 	 * 
@@ -29,27 +32,29 @@ public class AvaliacaoProduto implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_avaliacao_Produto")
 	private Long id;
+
 	
+	@NotNull
+	@Min(0)
+	@Max(10)
 	@Column(nullable = false)
 	private Integer nota;
-	
+
 	@ManyToOne(targetEntity = Pessoa.class)
-	@JoinColumn(name = "pessoa_id",nullable = false,foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT,name = "pessoa_fk"))
-	private Pessoa pessoa;
-	
-	
+	@JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
+	private PessoaFisica pessoa;
+
 	@ManyToOne(targetEntity = Pessoa.class)
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-	private Pessoa empresa;
-	
-	
+	private PessoaJuridica empresa;
+
 	@ManyToOne
-	@JoinColumn(name = "produto_id",nullable = false,foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT,name = "produto_fk"))
+	@JoinColumn(name = "produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "produto_fk"))
 	private Produto produto;
-	
-	  @Column(nullable = false)
+
+	@NotNull(message = "Informe uma descricao para a avaliação do produto")
+	@Column(nullable = false)
 	private String descricao;
-	
 
 	public Long getId() {
 		return id;
@@ -67,11 +72,11 @@ public class AvaliacaoProduto implements Serializable {
 		this.nota = nota;
 	}
 
-	public Pessoa getPessoa() {
+	public PessoaFisica getPessoa() {
 		return pessoa;
 	}
 
-	public void setPessoa(Pessoa pessoa) {
+	public void setPessoa(PessoaFisica pessoa) {
 		this.pessoa = pessoa;
 	}
 
@@ -108,15 +113,12 @@ public class AvaliacaoProduto implements Serializable {
 		this.descricao = descricao;
 	}
 
-	public Pessoa getEmpresa() {
+	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
 
-	public void setEmpresa(Pessoa empresa) {
+	public void setEmpresa(PessoaJuridica empresa) {
 		this.empresa = empresa;
 	}
-	
-	
-	
-	
+
 }

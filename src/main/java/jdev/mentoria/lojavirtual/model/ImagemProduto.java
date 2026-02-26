@@ -3,7 +3,9 @@ package jdev.mentoria.lojavirtual.model;
 import java.io.Serializable;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -33,7 +35,6 @@ public class ImagemProduto implements Serializable {
 	@Column(columnDefinition = "text",nullable = false)
 	private String imagemOriginal;
 	
-	@JsonIgnore
 	@ManyToOne(targetEntity = Pessoa.class)
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
@@ -41,7 +42,7 @@ public class ImagemProduto implements Serializable {
 	@Column(columnDefinition = "text",nullable = false)
 	private String imagemMiniatura;
 
-	@JsonIgnore
+	
 	@ManyToOne()
 	@JoinColumn(name = "produto_id",nullable = false,foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT,name = "produto_fk"))
 	private Produto produto;

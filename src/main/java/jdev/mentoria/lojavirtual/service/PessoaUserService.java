@@ -281,9 +281,7 @@ public class PessoaUserService {
 		// Persiste a empresa e garante que o ID seja gerado
 		pessoaFisica = pessoaFisicaRepository.save(pessoaFisica);
 		
-		
-		
-		
+			
 		
 		
 		
@@ -389,9 +387,9 @@ public class PessoaUserService {
 				e.printStackTrace();
 			}
 		}
-
 		
 		
+			
 		
 		// Retorna a pessoa jurídica salva (com ou sem criação do usuário)
 		return pessoaFisica;

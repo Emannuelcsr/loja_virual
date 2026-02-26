@@ -64,6 +64,7 @@ public class Produto implements Serializable {
 	@JoinColumn(name = "marca_produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "marca_produto_fk"))
 	private MarcaProduto marcaProduto;
 
+	
 	@OneToMany(mappedBy = "produto", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<ImagemProduto> imagemProdutos = new ArrayList<ImagemProduto>();
 
