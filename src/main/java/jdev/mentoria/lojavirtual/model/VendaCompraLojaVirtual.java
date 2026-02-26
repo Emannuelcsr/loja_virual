@@ -61,6 +61,8 @@ public class VendaCompraLojaVirtual implements Serializable {
 
 	private BigDecimal valorDesconto;
 
+	private Boolean excluido = Boolean.FALSE;
+	
 	
 	@ManyToOne(targetEntity = Pessoa.class)
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
@@ -224,6 +226,14 @@ public class VendaCompraLojaVirtual implements Serializable {
 
 	public void setItemVendaLojas(List<ItemVendaLoja> itemVendaLojas) {
 		this.itemVendaLojas = itemVendaLojas;
+	}
+
+	public Boolean getExcluido() {
+		return excluido;
+	}
+
+	public void setExcluido(Boolean excluido) {
+		this.excluido = excluido;
 	}
 	
 	
