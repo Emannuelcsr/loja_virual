@@ -376,6 +376,73 @@ public class Vc_Cp_Loja_Virtual_Controller {
 	
 	
 	
+	@GetMapping(value = "/consultaFaixaData/{data1}/{data2}")
+	public ResponseEntity<List<VendaCompraLojaVirtualDTO>> consultaFaixaData (@PathVariable("data1")String data1,@PathVariable("data2")String data2){
+		
+		  List<VendaCompraLojaVirtual> vendaBuscada = null;
+		  
+		  
+		  
+
+		  java.sql.Date d1 = java.sql.Date.valueOf(data1); // "2026-02-25"
+		  java.sql.Date d2 = java.sql.Date.valueOf(data2); // "2026-02-27"
+
+		  List<VendaCompraLojaVirtual> vendas = vd_cp_Loja_virtual_Repository.consultaVendaPorData(d1, d2);
+		  
+		  vendaBuscada = vendas;
+		  
+		  if (vendaBuscada == null) {
+		        vendaBuscada = new ArrayList<VendaCompraLojaVirtual>();
+		   }
+		  	
+		
+		 List<VendaCompraLojaVirtualDTO> virtualDTOList =
+		            new ArrayList<VendaCompraLojaVirtualDTO>();
+    
+		    
+		    for (VendaCompraLojaVirtual vcl : vendaBuscada) {
+
+		        VendaCompraLojaVirtualDTO virtualDTO =
+		                new VendaCompraLojaVirtualDTO();
+
+		        
+		        
+		        
+		        
+		        virtualDTO.setValorTotal(vcl.getValorTotal());
+		        virtualDTO.setPessoa(vcl.getPessoa());
+		        virtualDTO.setEntrega(vcl.getEnderecoEntrega());
+		        virtualDTO.setCobranca(vcl.getEnderecoCobranca());
+		        virtualDTO.setValorDesconto(vcl.getValorDesconto());
+		        virtualDTO.setId(vcl.getId());
+ 
+		        for (ItemVendaLoja itemVendaLoja : vcl.getItemVendaLojas()) {
+
+		            ItemVendaDTO itemVendaDTO = new ItemVendaDTO();
+
+		            Produto produto = itemVendaLoja.getProduto();
+
+		            ProdutoDTO produtoDTO = new ProdutoDTO();
+		            produtoDTO.setId(produto.getId());
+		            produtoDTO.setNome(produto.getNome());
+		            produtoDTO.setValorVenda(produto.getValorVenda());
+
+		            itemVendaDTO.setProduto(produtoDTO);
+		            itemVendaDTO.setQuantidade(itemVendaLoja.getQuantidade());
+
+		            virtualDTO.getItemVendaDTOs().add(itemVendaDTO);
+		        }
+
+		        virtualDTOList.add(virtualDTO);
+		    }
+		
+		   return new ResponseEntity<List<VendaCompraLojaVirtualDTO>>(
+		            virtualDTOList, HttpStatus.OK);
+	}
+	
+	
+	
+	
 	
 	
 	

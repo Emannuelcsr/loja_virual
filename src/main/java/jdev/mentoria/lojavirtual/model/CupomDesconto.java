@@ -37,11 +37,10 @@ public class CupomDesconto implements Serializable {
 
 	private BigDecimal valorPorcDesc;
 
-	
 	@ManyToOne(targetEntity = Pessoa.class)
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-	private Pessoa empresa;
-	
+	private PessoaJuridica empresa;
+
 	@Column(nullable = false)
 	@Temporal(TemporalType.DATE)
 	private Date dataValidadeCupom;
@@ -103,11 +102,11 @@ public class CupomDesconto implements Serializable {
 		return Objects.equals(id, other.id);
 	}
 
-	public Pessoa getEmpresa() {
+	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
 
-	public void setEmpresa(Pessoa empresa) {
+	public void setEmpresa(PessoaJuridica empresa) {
 		this.empresa = empresa;
 	}
 

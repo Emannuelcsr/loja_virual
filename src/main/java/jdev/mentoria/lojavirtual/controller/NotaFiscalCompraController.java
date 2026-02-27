@@ -24,6 +24,9 @@ public class NotaFiscalCompraController {
 	@Autowired
 	private NotaFiscalCompraRepository notaFiscalCompraRepository;
 
+	
+	
+	
 	@SuppressWarnings("unchecked")
 	@GetMapping(value = "/buscarPorNotaFiscalPorDescricao/{desc}")
 	public ResponseEntity<List<NotaFiscalCompra>> buscarPorNotaFiscalPorDescricao(@PathVariable("desc") String desc) {
@@ -104,4 +107,27 @@ public class NotaFiscalCompraController {
 		return new ResponseEntity<NotaFiscalCompra>(notaFiscalCompraSalva, HttpStatus.OK);
 
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

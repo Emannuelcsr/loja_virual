@@ -94,6 +94,11 @@ public class VendaCompraLojaVirtual implements Serializable {
 	@Temporal(TemporalType.DATE)
 	private Date dataEntrega;
 
+	@NotNull(message = "Data da venda deve ser informada")
+	@Column(nullable = false)
+	@Temporal(TemporalType.DATE)
+	private Date dataVenda;
+	
 	
 	@OneToMany(mappedBy = "vendaCompraLojaVirtual", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<ItemVendaLoja> itemVendaLojas  = new ArrayList<ItemVendaLoja>();
@@ -234,6 +239,14 @@ public class VendaCompraLojaVirtual implements Serializable {
 
 	public void setExcluido(Boolean excluido) {
 		this.excluido = excluido;
+	}
+
+	public Date getDataVenda() {
+		return dataVenda;
+	}
+
+	public void setDataVenda(Date dataVenda) {
+		this.dataVenda = dataVenda;
 	}
 	
 	

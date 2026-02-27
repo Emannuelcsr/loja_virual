@@ -1,8 +1,12 @@
 package jdev.mentoria.lojavirtual.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,4 +33,29 @@ public class FormaPagamentoController {
 
 		return new ResponseEntity<FormaPagamento>(formaPagamentoSalva, HttpStatus.OK);
 	}
+	
+	@GetMapping("/listFormaPagamento")
+	public ResponseEntity<List<FormaPagamento>> listFormaPagamento(){
+		
+		
+		
+		
+		return new ResponseEntity<List<FormaPagamento>>(formaPagamentoRepository.findAll(),HttpStatus.OK);
+	}
+	
+	
+	@GetMapping("/listFormaPagamentoPorEmpresa/{idEmpresa}")
+	public ResponseEntity<List<FormaPagamento>> listFormaPagamentoPorEmpresa(@PathVariable("idEmpresa")Long idEmpresa){
+		
+		
+		
+		
+		return new ResponseEntity<List<FormaPagamento>>(formaPagamentoRepository.findAll(idEmpresa),HttpStatus.OK);
+	}
+	
+	
+	
+	
+	
+	
 }

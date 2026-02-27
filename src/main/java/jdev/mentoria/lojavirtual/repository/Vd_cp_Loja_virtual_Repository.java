@@ -79,4 +79,22 @@ public interface Vd_cp_Loja_virtual_Repository extends JpaRepository<VendaCompra
 			+ "where i.vendaCompraLojaVirtual.excluido = false " + "and upper(trim(i.vendaCompraLojaVirtual.enderecoEntrega.ruaLogra)) like %?1%")
 	List<VendaCompraLojaVirtual> vendaPorEndEntrega(String trim);
 
+	
+	@Query(
+			  "select distinct i.vendaCompraLojaVirtual " +
+			  "from ItemVendaLoja i " +
+			  "where i.vendaCompraLojaVirtual.excluido = false " +
+			  "and i.vendaCompraLojaVirtual.dataVenda >= ?1 " +
+			  "and i.vendaCompraLojaVirtual.dataVenda <= ?2"
+			)
+	List<VendaCompraLojaVirtual> consultaVendaPorData(java.sql.Date data1, java.sql.Date data2);
+	
+	
+	@Query("select distinct i.vendaCompraLojaVirtual " + "from ItemVendaLoja i "
+			+ "where i.vendaCompraLojaVirtual.excluido = false " + "and i.vendaCompraLojaVirtual.pessoa.id = ?1")
+	List<VendaCompraLojaVirtual> vendasPorClienteID(Long idCliente);
+	
+	
+	
+
 }
