@@ -6,6 +6,7 @@ import java.util.List;
 
 import jdev.mentoria.lojavirtual.model.Endereco;
 import jdev.mentoria.lojavirtual.model.Pessoa;
+import jdev.mentoria.lojavirtual.model.PessoaJuridica;
 
 public class VendaCompraLojaVirtualDTO {
 
@@ -18,8 +19,11 @@ public class VendaCompraLojaVirtualDTO {
 	private Endereco cobranca;
 
 	private Endereco entrega;
-
-
+	
+	private Long empresa;
+	
+	
+	
 	private BigDecimal valorDesconto;
 
 	private BigDecimal valorFrete;
@@ -91,6 +95,14 @@ public class VendaCompraLojaVirtualDTO {
 
 	public void setItemVendaDTOs(List<ItemVendaDTO> itemVendaDTOs) {
 		this.itemVendaDTOs = itemVendaDTOs;
+	}
+
+	public Long getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(Long empresa) {
+		this.empresa = empresa;
 	}
 	
 		
