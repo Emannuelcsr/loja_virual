@@ -1,5 +1,6 @@
 package jdev.mentoria.lojavirtual.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import jdev.mentoria.lojavirtual.ExcepetionLojaVirtual;
 import jdev.mentoria.lojavirtual.model.NotaFiscalCompra;
+import jdev.mentoria.lojavirtual.model.dto.ObjetoRequisicaoRelatorioProdAlertaEstoque;
+import jdev.mentoria.lojavirtual.model.dto.ObjetoRequisicaoRelatorioProdCompraNotaFiscalDTO;
 import jdev.mentoria.lojavirtual.repository.NotaFiscalCompraRepository;
+import jdev.mentoria.lojavirtual.service.NotaFiscalCompraService;
 
 @RestController
 public class NotaFiscalCompraController {
@@ -24,7 +28,8 @@ public class NotaFiscalCompraController {
 	@Autowired
 	private NotaFiscalCompraRepository notaFiscalCompraRepository;
 
-	
+	@Autowired
+	private NotaFiscalCompraService notaFiscalCompraService;
 	
 	
 	@SuppressWarnings("unchecked")
@@ -110,10 +115,32 @@ public class NotaFiscalCompraController {
 	
 	
 	
+	@PostMapping("/relatorioProdutoCompradoNF")
+	public ResponseEntity<List<ObjetoRequisicaoRelatorioProdCompraNotaFiscalDTO>> relatorioProdutoCompradoNF(@RequestBody @Valid ObjetoRequisicaoRelatorioProdCompraNotaFiscalDTO objetoRequisicaoRelatorioProdCompraNotaFiscal) {
+		
+		
+		List<ObjetoRequisicaoRelatorioProdCompraNotaFiscalDTO> retorno = new ArrayList<ObjetoRequisicaoRelatorioProdCompraNotaFiscalDTO>();
+		
+		retorno = notaFiscalCompraService.gerarRelatorioProdCompraNota(objetoRequisicaoRelatorioProdCompraNotaFiscal);
+		
+		
+		return new ResponseEntity<List<ObjetoRequisicaoRelatorioProdCompraNotaFiscalDTO>>(retorno,HttpStatus.OK);
+		
+	}
 	
 	
-	
-	
+	@PostMapping("/relatorioProdutoAlertaQuantidade")
+	public ResponseEntity<List<ObjetoRequisicaoRelatorioProdAlertaEstoque>> relatorioProdutoAlertaQuantidade(@RequestBody @Valid ObjetoRequisicaoRelatorioProdAlertaEstoque objetoRequisicaoRelatorioProdAlertaEstoque ) {
+		
+		
+		List<ObjetoRequisicaoRelatorioProdAlertaEstoque> retorno = new ArrayList<ObjetoRequisicaoRelatorioProdAlertaEstoque>();
+		
+		retorno =  notaFiscalCompraService.gerarRelatorioAlertaEstoque(objetoRequisicaoRelatorioProdAlertaEstoque);
+		
+		
+		return new ResponseEntity<List<ObjetoRequisicaoRelatorioProdAlertaEstoque>>(retorno,HttpStatus.OK);
+		
+	}
 	
 	
 	

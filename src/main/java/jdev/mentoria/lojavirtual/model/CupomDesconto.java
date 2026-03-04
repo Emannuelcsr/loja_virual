@@ -18,6 +18,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "cupom_desconto")
@@ -30,6 +31,7 @@ public class CupomDesconto implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_cupom_desconto")
 	private Long id;
 
+	@NotEmpty(message = "informe o cod do desconto")
 	@Column(nullable = false)
 	private String codDescricao;
 
@@ -41,6 +43,7 @@ public class CupomDesconto implements Serializable {
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
 
+	@NotEmpty(message = "Informe a data de validade do cupom")
 	@Column(nullable = false)
 	@Temporal(TemporalType.DATE)
 	private Date dataValidadeCupom;
