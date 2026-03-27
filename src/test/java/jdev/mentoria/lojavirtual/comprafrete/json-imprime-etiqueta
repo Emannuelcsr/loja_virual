@@ -1,0 +1,29 @@
+													
+													
+													
+										JSON ENVIO			
+													
+													
+										RequestBody body = RequestBody.create(mediaType, """
+				{
+				"mode":"private",
+				  "orders": [
+				    "a13ce1b1-7856-4b75-a1cf-724bf6f3a908"
+				  ]
+				}
+						""");
+		
+							
+													
+													
+													
+													
+													
+													
+													
+													
+													
+													JSON RETORNO
+													
+													
+{"url":"https:\/\/sandbox.melhorenvio.com.br\/imprimir\/kmM2grqBL6Jv"}

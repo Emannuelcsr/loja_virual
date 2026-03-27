@@ -1,0 +1,187 @@
+	
+	
+	
+	
+										JSON ENVIO
+	
+	
+	
+	
+		RequestBody body = RequestBody.create(mediaType, """
+				{
+				  "orders": [
+				    "a13cdb5c-2c21-4730-8e05-e917550b2198"
+				  ]
+				}
+					
+
+
+							
+							json retorno
+							
+							
+							
+{
+  "digitable": null,
+  "redirect": null,
+  "message": null,
+  "token": null,
+  "payment_id": null,
+  "purchase": {
+    "id": "a13cdb77-434a-4b9a-a841-340d4a349203",
+    "protocol": "PUR-202603125906",
+    "total": 65.93,
+    "discount": 0,
+    "status": "paid",
+    "paid_at": "2026-03-06 20:05:21",
+    "canceled_at": null,
+    "created_at": "2026-03-06 20:05:21",
+    "updated_at": "2026-03-06 20:05:21",
+    "payment": null,
+    "transactions": [
+      {
+        "id": "a13cdb77-5a3e-48bf-ba4e-6e132da25da0",
+        "protocol": "TRN-202603135497",
+        "value": 65.93,
+        "type": "debit",
+        "status": "authorized",
+        "description": "Pagamento de envios (PUR-202603125906)",
+        "description_internal": null,
+        "created_at": "2026-03-06 20:05:21",
+        "reserved_at": null,
+        "authorized_at": "2026-03-06 20:05:21",
+        "unauthorized_at": null,
+        "canceled_at": null,
+        "reason": {
+          "id": 7,
+          "label": "Pagamento de envios",
+          "description": ""
+        }
+      }
+    ],
+    "orders": [
+      {
+        "id": "a13cdb5c-2c21-4730-8e05-e917550b2198",
+        "service_id": 2,
+        "agency_id": null,
+        "protocol": "ORD-202603264483",
+        "contract": null,
+        "service_code": null,
+        "quote": 65.93,
+        "price": 65.93,
+        "coupon": null,
+        "discount": 0,
+        "delivery_min": 2,
+        "delivery_max": 3,
+        "status": "released",
+        "reminder": null,
+        "insurance_value": 0,
+        "weight": null,
+        "width": null,
+        "height": null,
+        "length": null,
+        "diameter": null,
+        "format": "box",
+        "billed_weight": 1,
+        "receipt": true,
+        "own_hand": true,
+        "collect": false,
+        "reverse": 1,
+        "non_commercial": true,
+        "authorization_code": null,
+        "tracking": null,
+        "self_tracking": null,
+        "delivery_receipt": null,
+        "additional_info": {
+          "origin_ibge": "4314407",
+          "destination_ibge": "3550308"
+        },
+        "cte_key": null,
+        "collect_scheduled_at": null,
+        "paid_at": "2026-03-06 20:05:21",
+        "generated_at": null,
+        "posted_at": null,
+        "delivered_at": null,
+        "canceled_at": null,
+        "suspended_at": null,
+        "expired_at": null,
+        "created_at": "2026-03-06 20:05:03",
+        "updated_at": "2026-03-06 20:05:21",
+        "parse_pi_at": null,
+        "received_at": null,
+        "from": {
+          "name": "Loja Teste",
+          "phone": null,
+          "email": null,
+          "document": "06826774933",
+          "company_document": null,
+          "state_register": null,
+          "postal_code": "96020360",
+          "address": "Rua das Flores",
+          "location_number": null,
+          "complement": null,
+          "district": null,
+          "city": "Pelotas",
+          "state_abbr": "RS",
+          "country_id": "BR",
+          "latitude": null,
+          "longitude": null,
+          "note": null,
+          "economic_activity_code": null
+        },
+        "to": {
+          "name": "Cliente Teste",
+          "phone": null,
+          "email": "emannuelsouza@hotmail.com",
+          "document": "84172575005",
+          "company_document": null,
+          "state_register": null,
+          "postal_code": "01018020",
+          "address": "Praca da Se",
+          "location_number": null,
+          "complement": null,
+          "district": null,
+          "city": "Sao Paulo",
+          "state_abbr": "SP",
+          "country_id": "BR",
+          "latitude": null,
+          "longitude": null,
+          "note": null,
+          "economic_activity_code": null
+        },
+        "service": {
+          "id": 2,
+          "name": "SEDEX",
+          "status": "available",
+          "type": "express",
+          "range": "interstate",
+          "restrictions": "{\"insurance_value\":{\"min\":0,\"max\":10000,\"max_dec\":1000},\"formats\":{\"box\":{\"weight\":{\"min\":0.001,\"max\":30},\"width\":{\"min\":11,\"max\":100},\"height\":{\"min\":2,\"max\":100},\"length\":{\"min\":16,\"max\":100},\"sum\":200},\"roll\":{\"weight\":{\"min\":0.001,\"max\":30},\"diameter\":{\"min\":5,\"max\":91},\"length\":{\"min\":18,\"max\":100},\"sum\":200},\"letter\":{\"weight\":{\"min\":0.001,\"max\":0.5},\"width\":{\"min\":11,\"max\":60},\"length\":{\"min\":16,\"max\":60}}}}",
+          "requirements": "[\"names\",\"addresses\",\"documents\"]",
+          "optionals": "[\"AR\",\"MP\",\"VD\"]",
+          "company": {
+            "id": 1,
+            "name": "Correios",
+            "tracking_link": "https://www.melhorrastreio.com.br/rastreio/",
+            "has_grouped_volumes": 0,
+            "status": "available",
+            "picture": "/images/shipping-companies/correios.png",
+            "use_own_contract": false,
+            "batch_size": 1
+          }
+        },
+        "agency": null,
+        "invoice": null,
+        "tags": [],
+        "products": [
+          {
+            "name": "Produto A",
+            "quantity": 1,
+            "unitary_value": 10.1,
+            "weight": null
+          }
+        ]
+      }
+    ]
+  },
+  "conciliation_group": null
+}

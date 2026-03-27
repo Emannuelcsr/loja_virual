@@ -1,0 +1,18 @@
+																		JSON ENVIO
+
+		RequestBody body = RequestBody.create(mediaType, """
+				{
+				"mode":"private",
+				  "orders": [
+				    "a13ce1b1-7856-4b75-a1cf-724bf6f3a908"
+				  ]
+				}
+						""");
+		
+																			
+																	
+																	
+																	JSON RETORNO
+																	
+																	
+{"generate_key":"a13ce1e3-0a83-406c-9b1f-ad6b2029fb97","a13ce1b1-7856-4b75-a1cf-724bf6f3a908":{"message":"Envio encaminhado para gera\u00e7\u00e3o","status":true}}

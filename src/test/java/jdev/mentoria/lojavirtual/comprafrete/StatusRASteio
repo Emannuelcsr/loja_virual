@@ -1,0 +1,73 @@
+
+
+
+enviado:
+
+
+package jdev.mentoria.lojavirtual;
+
+import java.io.IOException;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+public class TestRastreio {
+	
+	public static void main(String[] args) throws IOException {
+		
+		OkHttpClient client = new OkHttpClient();
+
+		MediaType mediaType = MediaType.parse("application/json");
+		
+		
+		RequestBody body = RequestBody.create(mediaType, """
+				{
+				  "orders": [
+				    "a13ce1b1-7856-4b75-a1cf-724bf6f3a908"
+				  ]
+				}
+						""");
+		
+		Request request = new Request.Builder()
+		  .url("https://sandbox.melhorenvio.com.br/api/v2/me/shipment/tracking")
+		  .post(body)
+		  .addHeader("accept", "application/json")
+		  .addHeader("Accept", "application/json")
+		  .addHeader("Content-type", "application/json")
+		  .addHeader("Authorization", "Bearer "+ApiTokenIntegracao.TOKEN_SANDBOX_MELHOR_ENVIO)
+		  .addHeader("User-Agent", "eu@eu.com")
+		  .build();
+
+		Response response = client.newCall(request).execute();
+		String respostaAgencias = response.body().string();
+		System.out.println("RESPOSTA AGENCIAS = " + respostaAgencias);
+		
+		
+	}
+
+}
+
+
+
+resposta
+
+
+"RESPOSTA AGENCIAS ="{
+   "a13ce1b1-7856-4b75-a1cf-724bf6f3a908":{
+      "id":"a13ce1b1-7856-4b75-a1cf-724bf6f3a908",
+      "protocol":"ORD-202603264485",
+      "status":"posted",
+      "tracking":"QH25079138BR",
+      "melhorenvio_tracking":"ME26005O2T5BR",
+      "created_at":"2026-03-06 20:22:46",
+      "paid_at":"2026-03-06 20:23:03",
+      "generated_at":"2026-03-06 20:23:20",
+      "posted_at":"2026-03-06 20:40:06",
+      "delivered_at":null,
+      "canceled_at":null,
+      "expired_at":null
+   }
+}

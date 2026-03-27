@@ -1,0 +1,102 @@
+				JSON ENVIO
+
+
+RequestBody body = RequestBody.create(mediaType, """
+				{
+				  "service": "2",
+				  "from": {
+				    "name": "Loja Teste",
+				    "address": "Rua das Flores",
+				    "document":"06826774933",
+				    "city": "Pelotas",
+				    "postal_code": "96020360"
+				  },
+				  "to": {
+				    "name": "Cliente Teste",
+				    "document":"84172575005",
+				    "address": "Praca da Se",
+				    "city": "Sao Paulo",
+				    "postal_code": "01018020"
+				  },
+				  "products": [
+				    {
+				      "name": "Produto A",
+				      "quantity": 1,
+				      "unitary_value": 10.10
+				    }
+				  ],
+				  "volumes": [
+				    {
+				      "weight": 1.0,
+				      "length": 11,
+				      "width": 11,
+				      "height": 17
+				    }
+				  ],
+				  "options": {
+				    "receipt": true,
+				    "own_hand": true,
+				    "reverse": true,
+				    "non_commercial": true
+				  }
+				}
+				""");
+				
+			
+														json retorno		
+					
+			
+				{
+  "id": "a13cd233-19a4-42d3-b241-79c69414a7cf",
+  "protocol": "ORD-202603264480",
+  "service_id": 2,
+  "agency_id": null,
+  "contract": null,
+  "service_code": null,
+  "quote": 65.93,
+  "price": 65.93,
+  "coupon": null,
+  "discount": 0,
+  "delivery_min": 2,
+  "delivery_max": 3,
+  "status": "pending",
+  "reminder": null,
+  "insurance_value": 0,
+  "weight": null,
+  "width": null,
+  "height": null,
+  "length": null,
+  "diameter": null,
+  "format": "box",
+  "billed_weight": 1,
+  "receipt": true,
+  "own_hand": true,
+  "collect": false,
+  "collect_scheduled_at": null,
+  "reverse": 1,
+  "non_commercial": true,
+  "authorization_code": null,
+  "tracking": null,
+  "self_tracking": null,
+  "delivery_receipt": null,
+  "additional_info": {
+    "origin_ibge": "4314407",
+    "destination_ibge": "3550308"
+  },
+  "cte_key": null,
+  "paid_at": null,
+  "generated_at": null,
+  "posted_at": null,
+  "delivered_at": null,
+  "canceled_at": null,
+  "suspended_at": null,
+  "expired_at": null,
+  "created_at": "2026-03-06 19:39:26",
+  "updated_at": "2026-03-06 19:39:26",
+  "parse_pi_at": null,
+  "received_at": null,
+  "risk": false
+}
+
+
+				

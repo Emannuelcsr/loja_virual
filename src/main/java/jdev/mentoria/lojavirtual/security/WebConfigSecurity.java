@@ -136,7 +136,8 @@ public class WebConfigSecurity {
                  * - e devolve o token JWT no header/body
                  */
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
-
+                .requestMatchers(HttpMethod.POST, "/requisicaojunoboleto/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/").permitAll()
                  // 🔒 todo o resto exige estar autenticado
                 .anyRequest().authenticated()
             )

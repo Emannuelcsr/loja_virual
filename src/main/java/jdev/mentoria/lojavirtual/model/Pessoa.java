@@ -26,45 +26,43 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jdev.mentoria.lojavirtual.enums.TipoEndereco;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@SequenceGenerator(name = "seq_pessoa", sequenceName =  "seq_pessoa",allocationSize = 1,initialValue = 1)
-public abstract class Pessoa  implements Serializable{
+@SequenceGenerator(name = "seq_pessoa", sequenceName = "seq_pessoa", allocationSize = 1, initialValue = 1)
+public abstract class Pessoa implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "seq_pessoa")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_pessoa")
 	private Long id;
-	
-	@Size(min = 4,message = "O nome dever ter no minimo 4 letas")
+
+	@Size(min = 4, message = "O nome dever ter no minimo 4 letas")
 	@NotBlank(message = "Informe o nome")
 	@NotNull(message = "Informe o nome")
 	@Column(nullable = false)
 	private String nome;
 
-	
 	@Email
 	@Column(nullable = false)
 	private String email;
-	
+
 	@Column(nullable = false)
 	private String telefone;
 
-	@OneToMany(mappedBy = "pessoa",orphanRemoval = true,cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "pessoa", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Endereco> enderecos = new ArrayList<Endereco>();
-	
+
 	@JsonIgnore
 	@ManyToOne(targetEntity = Pessoa.class)
 	@JoinColumn(name = "empresa_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private Pessoa empresa;
-	
+
 	@Column
 	private String tipoPessoa;
-	
-	
-	
+
 	public List<Endereco> getEnderecos() {
 		return enderecos;
 	}
@@ -137,9 +135,20 @@ public abstract class Pessoa  implements Serializable{
 	public void setEmpresa(Pessoa empresa) {
 		this.empresa = empresa;
 	}
-	
-	
-	
-	
-	
+
+	public Endereco enderecoEntrega() {
+
+	    Endereco enderecoReturn = null;
+
+	    for (Endereco endereco : enderecos) {
+
+	        if (endereco.getTipoEndereco().name().equals(TipoEndereco.ENTREGA.name())) {
+	            enderecoReturn = endereco;
+	            break;
+	        }
+	    }
+
+	    return enderecoReturn;
+	}
+
 }

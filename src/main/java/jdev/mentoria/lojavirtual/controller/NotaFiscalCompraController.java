@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import jdev.mentoria.lojavirtual.ExcepetionLojaVirtual;
 import jdev.mentoria.lojavirtual.model.NotaFiscalCompra;
+import jdev.mentoria.lojavirtual.model.dto.ObjetoRelatorioStatusCompra;
 import jdev.mentoria.lojavirtual.model.dto.ObjetoRequisicaoRelatorioProdAlertaEstoque;
 import jdev.mentoria.lojavirtual.model.dto.ObjetoRequisicaoRelatorioProdCompraNotaFiscalDTO;
 import jdev.mentoria.lojavirtual.repository.NotaFiscalCompraRepository;
@@ -142,7 +143,18 @@ public class NotaFiscalCompraController {
 		
 	}
 	
-	
+	@PostMapping("/relatorioStatusCompra")
+	public ResponseEntity<List<ObjetoRelatorioStatusCompra>> relatorioStatusCompra(@RequestBody @Valid ObjetoRelatorioStatusCompra objetoRequisicaoRelatorioProdAlertaEstoque ) {
+		
+		
+		List<ObjetoRelatorioStatusCompra> retorno = new ArrayList<ObjetoRelatorioStatusCompra>();
+		
+		retorno =  notaFiscalCompraService.relatorioStatusVendaLojaVirtual(objetoRequisicaoRelatorioProdAlertaEstoque);
+		
+		
+		return new ResponseEntity<List<ObjetoRelatorioStatusCompra>>(retorno,HttpStatus.OK);
+		
+	}
 	
 	
 	

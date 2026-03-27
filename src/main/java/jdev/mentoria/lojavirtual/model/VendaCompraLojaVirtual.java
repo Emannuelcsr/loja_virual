@@ -14,6 +14,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -29,6 +31,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jdev.mentoria.lojavirtual.enums.StatusVendaLojaVirtual;
 
 @Entity
 @Table(name = "venda_compra_loja_virtual")
@@ -98,6 +101,24 @@ public class VendaCompraLojaVirtual implements Serializable {
 	@Column(nullable = false)
 	@Temporal(TemporalType.DATE)
 	private Date dataVenda;
+	
+	@NotNull(message = "Status da venda deve ser informada")
+	@Column(nullable = true)
+	@Enumerated(EnumType.STRING)
+	private StatusVendaLojaVirtual statusVendaLojaVirtual;
+	
+	@Column(name = "codigo_etiqueta")
+	private String codigoEtiqueta;
+	
+	
+	@Column(name = "url_imprime_etiqueta")
+	private String urlImprimeEtiqueta;
+	
+	
+	private String servicoTransportadora;
+	
+	
+	
 	
 	
 	@OneToMany(mappedBy = "vendaCompraLojaVirtual", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -247,6 +268,38 @@ public class VendaCompraLojaVirtual implements Serializable {
 
 	public void setDataVenda(Date dataVenda) {
 		this.dataVenda = dataVenda;
+	}
+
+	public StatusVendaLojaVirtual getStatusVendaLojaVirtual() {
+		return statusVendaLojaVirtual;
+	}
+
+	public void setStatusVendaLojaVirtual(StatusVendaLojaVirtual statusVendaLojaVirtual) {
+		this.statusVendaLojaVirtual = statusVendaLojaVirtual;
+	}
+
+	public String getCodigoEtiqueta() {
+		return codigoEtiqueta;
+	}
+
+	public void setCodigoEtiqueta(String codigoEtiqueta) {
+		this.codigoEtiqueta = codigoEtiqueta;
+	}
+
+	public String getUrlImprimeEtiqueta() {
+		return urlImprimeEtiqueta;
+	}
+
+	public void setUrlImprimeEtiqueta(String urlImprimeEtiqueta) {
+		this.urlImprimeEtiqueta = urlImprimeEtiqueta;
+	}
+
+	public String getServicoTransportadora() {
+		return servicoTransportadora;
+	}
+
+	public void setServicoTransportadora(String servicoTransportadora) {
+		this.servicoTransportadora = servicoTransportadora;
 	}
 	
 	
