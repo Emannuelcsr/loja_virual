@@ -8,10 +8,14 @@ import org.springframework.security.core.GrantedAuthority;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -78,14 +82,38 @@ public class Acesso implements GrantedAuthority {
     private String descricao;
 
     
+	@ManyToOne(targetEntity = PessoaJuridica.class)
+	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	private PessoaJuridica empresa;
     
     
     
     
     
     
-    
-    /**
+    public PessoaJuridica getEmpresa() {
+		return empresa;
+	}
+
+
+
+
+
+
+
+
+	public void setEmpresa(PessoaJuridica empresa) {
+		this.empresa = empresa;
+	}
+
+
+
+
+
+
+
+
+	/**
      * Método exigido pela interface {@link GrantedAuthority}.
      *
      * <p>O Spring Security chama esse método automaticamente

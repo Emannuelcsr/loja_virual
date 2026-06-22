@@ -10,4 +10,10 @@ public class ApiTokenIntegracao {
     
     public static final String TOKEN_GET_RESPONSE = "api-key sqkxrqk5ou1yilae4hyivvtiqxsgt0hq";
     public static final String URL_END_POINT_GET_RESPONSE = "https://api.getresponse.com/v3/";
+    
+    public static final String TOKEN_EMAIL_MARKETING = "api-key xk4rh7plqduhntjz19vsayyuzs715xzj";
+    public static final String URL_EMAIL_MARKETING = "https://api.getresponse.com/v3/";
+    
+    
+    
 }

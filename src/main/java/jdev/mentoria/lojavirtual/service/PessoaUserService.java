@@ -7,6 +7,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jdev.mentoria.lojavirtual.model.PessoaFisica;
 import jdev.mentoria.lojavirtual.model.PessoaJuridica;
 import jdev.mentoria.lojavirtual.model.Usuario;
@@ -38,7 +41,8 @@ public class PessoaUserService {
 
 	
 	
-	
+	@PersistenceContext
+	private EntityManager entityManager;
 	
 	/**
 	 * Repositório responsável pelas operações de banco relacionadas a
@@ -115,7 +119,7 @@ public class PessoaUserService {
 			pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
 
 			// Faz o endereço “apontar” para a empresa (empresa associada ao endereço)
-			pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica);
+			pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica.getEmpresa());
 		}
 
 		
@@ -127,7 +131,7 @@ public class PessoaUserService {
 		// ------------------------------------------------------------
 
 		// Persiste a empresa e garante que o ID seja gerado
-		pessoaJuridica = pessoaRepository.save(pessoaJuridica);
+		pessoaJuridica = pessoaRepository.save(pessoaJuridica.getEmpresa());
 		
 		
 		
@@ -162,7 +166,7 @@ public class PessoaUserService {
 			usuarioPJ.setDataAtualSenha(Calendar.getInstance().getTime());
 
 			// Define empresa e pessoa associadas ao usuário
-			usuarioPJ.setEmpresa(pessoaJuridica);
+			usuarioPJ.setEmpresa(pessoaJuridica.getEmpresa());
 			usuarioPJ.setPessoa(pessoaJuridica);
 
 			// Login será o e-mail da empresa
@@ -312,7 +316,7 @@ public class PessoaUserService {
 			usuarioPJ.setDataAtualSenha(Calendar.getInstance().getTime());
 
 			// Define empresa e pessoa associadas ao usuário
-			usuarioPJ.setEmpresa(pessoaFisica);
+			usuarioPJ.setEmpresa(pessoaFisica.getEmpresa());
 			usuarioPJ.setPessoa(pessoaFisica);
 
 			// Login será o e-mail da empresa
@@ -411,6 +415,25 @@ public class PessoaUserService {
 	}
 	
 	
+	
+	public Boolean possuiAcesso(String username,String sqlRole) {
+		
+		// Monta a consulta SQL que vai verificar se o usuário possui
+	    // alguma das roles permitidas para acessar a tela.
+	    String sql = "select count(1) > 0 " +
+	                 "from usuarios_acessos as ua " +
+	                 "inner join usuario as u on u.id = ua.usuario_id " +
+	                 "inner join acesso as a on a.id = ua.acesso_id " +
+	                 "where u.login = '" + username + "' " +
+	                 "and a.descricao in (" + sqlRole + ")";
+
+
+	    
+	    Query query = entityManager.createNativeQuery(sql);
+		
+	    return Boolean.valueOf(query.getSingleResult().toString());
+	    
+	}
 	
 	
 	

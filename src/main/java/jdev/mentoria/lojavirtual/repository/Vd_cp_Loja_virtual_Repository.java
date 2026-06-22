@@ -43,7 +43,10 @@ public interface Vd_cp_Loja_virtual_Repository extends JpaRepository<VendaCompra
 	@Query("update VendaCompraLojaVirtual v set v.excluido = false where v.id = :id")
 	void ativaVendaBanco(@Param("id") Long idVenda);
 
-	
+	@Modifying(flushAutomatically = true)
+	@Transactional
+	@Query(nativeQuery = true, value = "update venda_compra_loja_virtual set status_venda_loja_virtual = 'FINALIZADA' where id = ?1")
+	void updateFinalizaVenda(Long id);
 	
 	
 	/**
@@ -101,7 +104,7 @@ public interface Vd_cp_Loja_virtual_Repository extends JpaRepository<VendaCompra
 	void updateEtiqueta(String idEtiqueta, Long idVenda);
 
 	@Transactional
-	@Modifying(flushAutomatically = true)
+	@Modifying
 	@Query(nativeQuery = true, value = "update venda_compra_loja_virtual set url_imprime_etiqueta = ?1 where id = ?2 ")
 	void updateURLEtiqueta(String urlEtiqueta, Long id);
 	

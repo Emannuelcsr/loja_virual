@@ -1,0 +1,98 @@
+ENVIADO:
+
+
+
+		Client client = new HostIgnoreClient(AsaasApiPagamentoStatus.URL_API_ASAAS).hostIgnoreClient();
+
+		WebResource webResource = client.resource(AsaasApiPagamentoStatus.URL_API_ASAAS_SANDBOX + "pix/addressKeys");
+
+		ClientResponse clientResponse = webResource.accept("application/json;charset=UTF-8")
+				.header("Content-Type", "application/json").header("access_token", AsaasApiPagamentoStatus.API_KEY_SANDBOX)
+				.post(ClientResponse.class, "{\"type\":\"EVP\"}");
+
+		String retorno = clientResponse.getEntity(String.class);
+
+		System.out.println("STATUS=" + clientResponse.getStatus() + " | BODY=" + retorno);
+
+		clientResponse.close();
+
+
+
+RECEBIDO:
+
+
+STATUS=200 | BODY={
+   "id":"05f008b9-9a40-431b-8fcd-ac09e41e9978",
+   "key":"51905902-1ecf-403b-bbce-4c8c615a6fad",
+   "type":"EVP",
+   "status":"ACTIVE",
+   "dateCreated":"2026-04-01 15:50:12",
+   "canBeDeleted":true,
+   "cannotBeDeletedReason":null,
+   "qrCode":{
+      "encodedImage":"iVBORw0KGgoAAAANSUhEUgAAAcIAAAHCAQAAAABUY/ToAAADFElEQVR4Xu2UwY7bMBBDffP//1E/y7c0fKSUpEDhYi+dAJx4ZYnDxxw02ePxw/p1/Kn8a5W8q5J3VfKuSt5Vybv6b+R1UKc253U+hXP1L4mctDu3s+RkMi1sdN52O3DFxl9yMBkVCa+eFbU61wdfcjwpBhC/dBPJc1zJryHZsBrWL9ubzZf8CvIR1eIb9RIcF2fJ0SRG9W4/cZb862cAuYtR0OIpQHiNReYgVXIsSe9px6b/1FJ0BsBP5mMNRMnR5Ltinh5bN0mET6/kaFL3fHHxuNig2an9GotsSk4ml+F4sy8pIXbhKDmb5HoB0OKwQmt52EYoOZvkqG0CJFpShD8KTXzJueSDy7VDA7CtyCZ2eviSg0mz1vQsVD6A2NUgrORkEoG+9Ng5eUASfKhkKTmb3ANgp1u5fOcQGRdiyenkGgVwl0JwokZe41JyLGlQJr1y6RuWArZySw4nl0M961iwa68Xmf7JWy85l7TfFk4vhJYWBzpd3ZJjSW45V++Gg1DwSQWPp+RwUkIS5NWDYlVb+NdfybnkQ5fMXVvMnVvZfV5sSg4nmQGtLEI+DuEh+AodSo4lddLVx+VHlBSLGQ4pziw5mFx+y+5spzYyyLeWkrNJbW09ORKjnNeRQI8E9pJjyacrV22W4+Ll9N7fQafkcDK37p7cjIQT1mtH4iw5llQTVnZOGyOEmPUFTi85mHzBaxqwx+YYNVdMyeEkmlmZaEng5AgkEQ4vOZoEtH5BszcReGU4v+Rgkq79HwmYn2dNhM8rtORsMtbnS16tDktzp/sPpeRYMsDFhWt5nmWQSoMwY3xJydkk55je7t8pOcK5i1hyMLkUft/+kWcSENR9xbhKjiUNSndbaEoJNMlAUX7JyeQqCEC1VpK8IZNPlRxLXrl1+zjiUZKCQkdxt+RgUjs7bImbTHsxQ0soOZw0QudczwaITc72lfwKci2HUGMRpDAVBkt+ASlvMCfAmc5uv0sOJq2sexbG1SMmJg6LJUeTB2XdTh9FO+JiUnar5GTyR1XyrkreVcm7KnlXJe/qy8jfisFn00tYazMAAAAASUVORK5CYII=",
+      "payload":"00020126580014br.gov.bcb.pix013651905902-1ecf-403b-bbce-4c8c615a6fad5204000053039865802BR5925Emannuel Cesar de Souza R6015Balneario Cambo62290525EMANNUEL00000001136539ASA6304826D"
+   }
+   }
+   
+   
+   
+   ENVIADO:
+   
+   
+   jdev.mentoria.lojavirtual.service.ServiceAsaasBoleto.gerarCarneApiAsaas
+   
+   RECEBIDO:
+   
+   {
+   "object":"payment",
+   "id":"pay_l5e50ibuhpo2hka2",
+   "dateCreated":"2026-04-02",
+   "customer":"cus_000007741231",
+   "installment":"889e55e9-4f96-478f-a043-a9d5c1b34f94",
+   "checkoutSession":null,
+   "paymentLink":null,
+   "value":2599.9,
+   "netValue":2547.68,
+   "originalValue":null,
+   "interestValue":null,
+   "description":"Parcela 1 de 1. Pix ou boleto gerado para cobranca:29",
+   "billingType":"UNDEFINED",
+   "pixTransaction":null,
+   "status":"PENDING",
+   "dueDate":"2026-04-09",
+   "originalDueDate":"2026-04-09",
+   "paymentDate":null,
+   "clientPaymentDate":null,
+   "installmentNumber":1,
+   "invoiceUrl":"https://sandbox.asaas.com/i/l5e50ibuhpo2hka2",
+   "invoiceNumber":"13840193",
+   "externalReference":null,
+   "deleted":false,
+   "anticipated":false,
+   "anticipable":false,
+   "creditDate":null,
+   "estimatedCreditDate":null,
+   "transactionReceiptUrl":null,
+   "nossoNumero":"12193103",
+   "bankSlipUrl":"https://sandbox.asaas.com/b/pdf/l5e50ibuhpo2hka2",
+   "lastInvoiceViewedDate":null,
+   "lastBankSlipViewedDate":null,
+   "discount":{
+      "value":0.00,
+      "limitDate":null,
+      "dueDateLimitDays":0,
+      "type":"PERCENTAGE"
+   },
+   "fine":{
+      "value":1.00,
+      "type":"FIXED"
+   },
+   "interest":{
+      "value":1.00,
+      "type":"PERCENTAGE"
+   },
+   "postalService":false,
+   "escrow":null,
+   "refunds":null
+}

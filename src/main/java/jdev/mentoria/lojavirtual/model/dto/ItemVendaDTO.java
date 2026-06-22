@@ -19,7 +19,7 @@ public class ItemVendaDTO {
 		return produto;
 	}
 
-	public void setProduto(ProdutoDTO produto) {
+	public void setProduto(ProdutoDTO  produto) {
 		this.produto = produto;
 	}
 	

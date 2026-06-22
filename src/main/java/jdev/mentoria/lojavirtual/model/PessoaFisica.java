@@ -1,8 +1,11 @@
 package jdev.mentoria.lojavirtual.model;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import org.hibernate.validator.constraints.br.CPF;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,9 +23,13 @@ public class PessoaFisica extends Pessoa {
 	@Column(nullable = false)
 	private String cpf;
 
+	
 	@Temporal(TemporalType.DATE)
-	private Date dataNascimento;
+	private LocalDate dataNascimento;
 
+	
+	
+	
 	public String getCpf() {
 		return cpf;
 	}
@@ -31,13 +38,14 @@ public class PessoaFisica extends Pessoa {
 		this.cpf = cpf;
 	}
 
-	public Date getDataNascimento() {
+	public LocalDate getDataNascimento() {
 		return dataNascimento;
 	}
 
-	public void setDataNascimento(Date dataNascimento) {
+	public void setDataNascimento(LocalDate dataNascimento) {
 		this.dataNascimento = dataNascimento;
 	}
+
 
 	
 	

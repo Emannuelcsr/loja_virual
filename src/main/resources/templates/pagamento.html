@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+
+<!--
+/**
+ * Página HTML responsável pela tela de pagamento da loja virtual.
+ *
+ * <p>Função dessa página no sistema:</p>
+ * <p>Essa tela recebe dados da venda vindos do backend com Thymeleaf,
+ * mostra essas informações para o usuário, coleta os dados do cartão
+ * de crédito e envia tudo para o backend para concluir o pagamento.</p>
+ *
+ * <p>Tecnologias usadas aqui:</p>
+ * <ul>
+ *   <li>Thymeleaf: para trazer dados do backend para o HTML</li>
+ *   <li>Bootstrap: para layout e aparência visual</li>
+ *   <li>jQuery: para manipular campos e fazer requisição AJAX</li>
+ *   <li>jQuery Mask: para formatar CPF, CEP, CVV e número do cartão</li>
+ * </ul>
+ *
+ * <p>Resumo simples:</p>
+ * <p>Essa página é a etapa final da compra.
+ * Ela mostra os dados da venda, deixa o usuário preencher o cartão,
+ * valida as informações e manda para o backend processar o pagamento.</p>
+ */
+-->
+<title>Insert title here</title>
+
+<!--
+/**
+ * Importa o CSS do Bootstrap.
+ *
+ * <p>Bootstrap é usado para deixar a tela organizada
+ * com classes prontas como container, row, col-md-6, form-control, etc.</p>
+ */
+-->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+<!--
+/**
+ * Tema opcional do Bootstrap.
+ *
+ * <p>Ajuda na aparência visual de alguns componentes.</p>
+ */
+-->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+
+<!--
+/**
+ * JavaScript do Bootstrap.
+ *
+ * <p>Necessário para alguns comportamentos visuais do Bootstrap.</p>
+ */
+-->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<!--
+/**
+ * Biblioteca jQuery.
+ *
+ * <p>Ela será usada para:
+ * selecionar campos da tela, pegar valores, aplicar máscaras,
+ * capturar evento de blur e fazer AJAX.</p>
+ */
+-->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.map"></script>
+
+<!--
+/**
+ * Biblioteca de máscara para inputs.
+ *
+ * <p>Ela ajuda o usuário a digitar no formato correto.</p>
+ *
+ * <p>Exemplos:</p>
+ * <ul>
+ *   <li>CPF: 000.000.000-00</li>
+ *   <li>CEP: 00000-000</li>
+ *   <li>CVV: 000</li>
+ *   <li>Cartão: 0000.0000.0000.0000</li>
+ * </ul>
+ */
+-->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"></script> 
+
+</head>
+<body>
+
+<!--
+/**
+ * Container principal da tela.
+ *
+ * <p>Esse bloco centraliza e organiza todo o formulário de pagamento.</p>
+ */
+-->
+<div class="container">
+
+    <!--
+    /**
+     * Formulário principal da tela de checkout.
+     *
+     * <p>Esse formulário concentra:</p>
+     * <ul>
+     *   <li>dados da venda</li>
+     *   <li>dados do cliente</li>
+     *   <li>dados do cartão</li>
+     *   <li>endereço de cobrança</li>
+     *   <li>resumo financeiro da compra</li>
+     * </ul>
+     */
+    -->
+    <form style="padding-top: 20px; padding-bottom: 20px" id="formcheckout">
+    
+     <!--
+     /**
+      * Campo oculto que guarda o ID da venda.
+      *
+      * @value ${venda.id} id da venda vindo do backend
+      *
+      * <p>Esse valor será usado no JavaScript para dizer ao backend
+      * qual compra está sendo paga.</p>
+      */
+     -->
+     <input type="hidden" th:value="${venda.id}" id="idVendaCampo">
+    
+       <div class="form-row">
+       
+          <div class="form-group col-md-6">
+            <label for="nome">Nome:</label>
+            
+            <!--
+            /**
+             * Campo de nome do cliente.
+             *
+             * @value ${venda.pessoa.nome} nome da pessoa ligada à venda
+             *
+             * <p>readonly significa que o usuário pode ver, mas não editar.</p>
+             */
+            -->
+            <input th:value=${venda.pessoa.nome} type="text" class="form-control" readonly="readonly" id="nome" required="required" style="height: 40px;">
+          </div>
+          
+         <div class="form-group col-md-6">
+            <label for="email">Email:</label>
+            
+            <!--
+            /**
+             * Campo de email do cliente.
+             *
+             * @value ${venda.pessoa.email} email vindo do backend
+             *
+             * <p>Também é só leitura.</p>
+             */
+            -->
+            <input th:value="${venda.pessoa.email}" type="text" class="form-control" readonly="readonly" id="email" required="required" style="height: 40px;">
+          </div>
+       </div>
+       
+       <div class="form-row" id="linha1cartao">
+       
+           <div class="form-group col-md-6">
+              <label for="numerocartao">Número do cartão:</label>
+              
+              <!--
+              /**
+               * Campo para digitar o número do cartão.
+               *
+               * <p>Esse valor será lido no JavaScript e enviado ao backend.</p>
+               */
+              -->
+              <input type="text" placeholder="455.454.545454.5454544" class="form-control" id="numerocartao" required="required" style="height: 40px;">
+           </div>
+          
+            <div class="form-group col-md-6">
+              <label for="nomecartao">Nome como escrito no cartão:</label>
+              
+              <!--
+              /**
+               * Campo para digitar o nome do titular exatamente como está no cartão.
+               */
+              -->
+              <input type="text" placeholder="joão da silva" class="form-control" id="nomecartao" required="required" style="height: 40px;">
+           </div> 
+       </div>
+       
+       <div class="form-row" id="divcpf">
+         <div class="form-group col-md-12">
+              <label for="cpf">CPF do titular:</label>
+              
+              <!--
+              /**
+               * Campo de CPF do titular do cartão.
+               *
+               * @value ${venda.pessoa.cpf} CPF vindo do backend
+               *
+               * <p>Mesmo vindo preenchido, o campo continua sendo usado
+               * no envio do pagamento.</p>
+               */
+              -->
+            <input th:value="${venda.pessoa.cpf}" type="text" placeholder="000.000.000-00" class="form-control" id="cpf" required="required" style="height: 40px;">
+         </div>
+       </div>
+       
+       <div class="form-row" id="linha2cartao">
+       
+           <div class="form-group col-md-4">
+              <label for="mesvalidade">Mês de validade:</label>
+              
+              <!--
+              /**
+               * Select para escolher o mês de validade do cartão.
+               *
+               * <p>O valor selecionado será enviado ao backend
+               * como expirationMonth.</p>
+               */
+              -->
+              <select class="form-control" required="required" id="mesvalidade" style="height: 40px;">
+                 <option value="01">01</option>
+                 <option value="02">02</option>
+                 <option value="03">03</option>
+                 <option value="04">04</option>
+                 <option value="05">05</option>
+                 <option value="06">06</option>
+                 <option value="07">07</option>
+                 <option value="08">08</option>
+                 <option value="09">09</option>
+                 <option value="10">10</option>
+                 <option value="11">11</option>
+                 <option value="12">12</option>
+              </select>
+           </div>
+           
+           <div class="form-group col-md-4">
+              <label for="anovalidade">Ano de validade:</label>
+              
+              <!--
+              /**
+               * Select para escolher o ano de validade do cartão.
+               *
+               * <p>O valor será enviado ao backend
+               * como expirationYear.</p>
+               */
+              -->
+              <select class="form-control" required="required" id="anovalidade" style="height: 40px;">
+                 <option value="2022">22</option>
+                 <option value="2023">23</option>
+                 <option value="2024">24</option>
+                 <option value="2025">25</option>
+                 <option value="2026">26</option>
+                 <option value="2027">27</option>
+                 <option value="2028">28</option>
+                 <option value="2029">29</option>
+                 <option value="2030">30</option>
+                 <option value="2031">31</option>
+                 <option value="2032">32</option>
+                 <option value="2033">33</option>
+                 <option value="2034">34</option>
+                 <option value="2035">35</option>
+                 <option value="2036">36</option>
+                 <option value="2037">37</option>
+              </select>
+           </div>
+           
+           <div class="form-group col-md-4">
+           <label for="cvv">Código de segurança ou CVV:</label>
+           
+            <!--
+            /**
+             * Campo para o CVV do cartão.
+             *
+             * <p>É o código de segurança que normalmente fica
+             * atrás do cartão.</p>
+             */
+            -->
+            <input type="text" style="height: 40px;" placeholder="380" class="form-control" id="cvv" required="required">
+           </div> 
+           
+       </div>
+       
+       <div class="form-row">
+          <div class="form-group col-md-12">
+            <label for="qtdparcela">Selecione o número de parcela:</label>
+            
+            <!--
+            /**
+             * Select com a quantidade de parcelas.
+             *
+             * <p>O valor escolhido será enviado ao backend
+             * como qtdparcela.</p>
+             */
+            -->
+            <select class="form-control" required="required" id="qtdparcela" style="height: 40px;">
+                 <option value="1">1 x</option>
+                 <option value="2">2 x</option>
+                 <option value="3">3 x</option>
+                 <option value="4">4 x</option>
+                 <option value="5">5 x</option>
+                 <option value="6">6 x</option>
+                 <option value="7">7 x</option>
+                 <option value="8">8 x</option>
+                 <option value="9">9 x</option>
+                 <option value="10">10 x</option>
+                 <option value="11">11 x</option>
+                 <option value="12">12 x</option>
+              </select>
+          </div>
+       </div>
+       
+        <div class="form-row" id="divendereco">
+          <div class="form-group col-md-4">
+             <label for="cep">CEP de cobrança:</label>
+             
+             <!--
+             /**
+              * Campo do CEP de cobrança.
+              *
+              * <p>Quando o usuário sair desse campo, a aplicação tenta
+              * buscar rua, cidade e estado automaticamente no ViaCEP.</p>
+              */
+             -->
+            <input type="text" style="height: 40px;" placeholder="00000-000" class="form-control" id="cep" required="required">
+          </div>
+          
+          <div class="form-group col-md-4">
+             <label for="rua">Rua:</label>
+            <input type="text" style="height: 40px;" class="form-control" id="rua" required="required">
+          </div>
+          
+           <div class="form-group col-md-4">
+             <label for="numero">Número:</label>
+            <input type="text" style="height: 40px;" class="form-control" id="numero" required="required">
+          </div>
+        </div>
+        
+        <div class="form-row" id="divendereco2">
+        
+          <div class="form-group col-md-6">
+             <label for="estado">Estado:</label>
+            <input type="text" style="height: 40px;" placeholder="PR" class="form-control" id="estado" required="required">
+          </div>
+          
+         <div class="form-group col-md-6">
+             <label for="cidade">Cidade:</label>
+            <input type="text" style="height: 40px;" placeholder="Maringá" class="form-control" id="cidade" required="required">
+          </div>
+        </div>
+        
+        <div class="form-row">
+         <div class="form-group col-md-12">
+         
+           <!--
+           /**
+            * Botão responsável por iniciar o pagamento.
+            *
+            * <p>Quando o usuário clica, a função JavaScript
+            * realizarPagamento() é chamada.</p>
+            */
+           -->
+           <input id="buttonrealizarPagamento" onclick="realizarPagamento();" type="button" class="btn btn-primary btn-lg" value="Realizar Pagamento" style="font-size: 23px;height: 50px; width: 100%">
+         </div>
+        </div>
+        
+       <div class="form-row">
+         <div class="form-group col-md-6">
+           
+           <!--
+           /**
+            * Exibe o valor total da compra.
+            *
+            * @text ${venda.valorTotal}
+            */
+           -->
+           <span id="valorParaCompra" style="width: 100%;height: 30px; font-size: 19px;" th:text="@{'TOTAL R$: ' + ${venda.valorTotal}}">TOTAL R$:</span>
+         </div>
+         
+         <div class="form-group col-md-6">
+           
+           <!--
+           /**
+            * Exibe o valor de desconto da compra.
+            *
+            * @text ${venda.valorDesc}
+            */
+           -->
+           <span id="valorParaDesc" style="width: 100%;height: 30px; font-size: 19px;" th:text="@{'DESC. R$: ' + ${venda.valorDesconto}}">DESC. R$:</span>
+         </div>
+        </div>
+        
+       <div class="form-row">
+         <div class="form-group col-md-6">
+         
+           <!--
+           /**
+            * Exibe o valor do frete.
+            *
+            * @text ${venda.valorFrete}
+            */
+           -->
+           <span id="valorFrete" style="width: 100%;height: 30px; font-size: 19px;" th:text="@{'FRETE R$: ' + ${venda.valorFrete}}">FRETE R$:</span>
+         </div>
+        </div>
+        
+        <hr width="96%" style="color: #726868;border-top: 1px solid #726868;">
+        
+        <div class="form-row">
+            <div class="form-group col-md-6" style="margin-top: 8px;">
+             <label>Itens adicionados</label>
+             
+             <!--
+             /**
+              * Lista de itens da venda.
+              *
+              * @each p : ${venda.itemVendaLoja}
+              *
+              * <p>O Thymeleaf percorre todos os itens da venda
+              * e mostra nome + quantidade.</p>
+              */
+             -->
+              <div th:each="p : ${venda.itemVendaDTOs}">
+                 <span style="width: 100%; height: 15px; font-size: 11px;" th:text="@{${p.produto.nome} + ' - Qtd: ' + ${p.quantidade}}"></span>
+              </div>
+            </div>
+        </div>
+       
+    </form>
+</div>
+
+<script type="text/javascript">
+
+/**
+ * Bloco executado quando a página termina de carregar.
+ *
+ * <p>Esse trecho prepara a tela antes do usuário usar:</p>
+ * <ul>
+ *   <li>aplica máscaras nos campos</li>
+ *   <li>configura a limpeza de endereço</li>
+ *   <li>configura a busca automática do CEP</li>
+ * </ul>
+ *
+ * @return void
+ */
+$(document).ready(function() {
+        	
+    /*
+     * Aplica máscara no CPF.
+     * Exemplo: 12345678900 vira 123.456.789-00
+     */
+    $('#cpf').mask('000.000.000-00',{reverse: true});
+        	
+    /*
+     * Aplica máscara no CEP.
+     * Exemplo: 12345678 vira 12345-678
+     */
+    $('#cep').mask('00000-000',{reverse: true});
+        	
+    /*
+     * Aplica máscara no CVV.
+     * Exemplo: 123
+     */
+    $('#cvv').mask('000',{reverse: true});
+        	
+    /*
+     * Aplica máscara no número do cartão.
+     */
+    $('#numerocartao').mask('0000.0000.0000.0000',{reverse: true});
+
+    /**
+     * Limpa os campos do endereço.
+     *
+     * <p>Esse método é usado quando o CEP está vazio,
+     * inválido ou não encontrado.</p>
+     *
+     * @return void
+     */
+    function limpa_formulário_cep() {
+        // Limpa a rua
+        $("#rua").val("");
+        
+        // Limpa o número
+        $("#numero").val("");
+        
+        // Limpa a cidade
+        $("#cidade").val("");
+        
+        // Limpa o estado
+        $("#estado").val("");
+    }
+            
+    /**
+     * Evento executado quando o campo CEP perde o foco.
+     *
+     * <p>Fluxo:</p>
+     * <ol>
+     *   <li>Pega o CEP digitado</li>
+     *   <li>Remove caracteres que não são números</li>
+     *   <li>Valida se ele tem 8 dígitos</li>
+     *   <li>Consulta o ViaCEP</li>
+     *   <li>Preenche rua, cidade e estado automaticamente</li>
+     * </ol>
+     *
+     * @return void
+     */
+    $("#cep").blur(function() {
+
+        /*
+         * Pega o valor do CEP digitado e remove tudo que não for número.
+         *
+         * Exemplo:
+         * 87050-120 vira 87050120
+         */
+        var cep = $(this).val().replace(/\D/g, '');
+
+        /*
+         * Verifica se o campo não está vazio.
+         */
+        if (cep != "") {
+
+            /*
+             * Expressão regular para validar 8 dígitos numéricos.
+             */
+            var validacep = /^[0-9]{8}$/;
+
+            /*
+             * Se o CEP estiver no formato certo, continua.
+             */
+            if(validacep.test(cep)) {
+
+                /*
+                 * Enquanto consulta a API, coloca "..."
+                 * para mostrar ao usuário que está carregando.
+                 */
+                $("#rua").val("...");
+                $("#cidade").val("...");
+                $("#estado").val("..");
+
+                /*
+                 * Consulta a API pública do ViaCEP.
+                 *
+                 * Se achar o CEP, retorna os dados do endereço.
+                 */
+                $.getJSON("https://viacep.com.br/ws/"+ cep +"/json/?callback=?", function(dados) {
+                        	
+                    /*
+                     * Se a resposta não contiver erro,
+                     * preenche os campos automaticamente.
+                     */
+                    if (!("erro" in dados)) {
+                        $("#rua").val(dados.logradouro);
+                        $("#cidade").val(dados.localidade);
+                        $("#estado").val(dados.uf);
+                    }
+                    else {
+                        /*
+                         * Se o CEP não foi encontrado, limpa os campos
+                         * e avisa o usuário.
+                         */
+                        limpa_formulário_cep();
+                        alert("CEP não encontrado.");
+                    }
+                });
+            }
+            else {
+                /*
+                 * Se o formato do CEP for inválido,
+                 * limpa os campos e mostra o aviso.
+                 */
+                limpa_formulário_cep();
+                alert("Formato de CEP inválido.");
+            }
+        }
+        else {
+            /*
+             * Se o campo estiver vazio, só limpa os campos relacionados.
+             */
+            limpa_formulário_cep();
+        }
+    });
+});
+        
+        
+/**
+ * Método principal responsável por enviar os dados de pagamento ao backend.
+ *
+ * <p>Esse método é chamado ao clicar no botão "Realizar Pagamento".</p>
+ *
+ * <p>Fluxo do método:</p>
+ * <ol>
+ *   <li>Lê todos os campos da tela</li>
+ *   <li>Valida os campos obrigatórios</li>
+ *   <li>Monta o objeto cardData</li>
+ *   <li>Faz validações simples dos dados</li>
+ *   <li>Desabilita o botão para evitar clique duplo</li>
+ *   <li>Envia os dados via AJAX para o endpoint finalizarCompraCartao</li>
+ *   <li>Trata a resposta do backend</li>
+ * </ol>
+ *
+ * @return void
+ */
+function realizarPagamento(){
+	  
+    /*
+     * Lê o ID da venda.
+     */
+    var idVendaCampo = $('#idVendaCampo').val();
+    
+    /*
+     * Lê os dados do cartão e do endereço digitados pelo usuário.
+     */
+    var numerocartao = $('#numerocartao').val();
+    var nomecartao = $('#nomecartao').val();
+    var cpf = $('#cpf').val();
+    var mesvalidade = $('#mesvalidade').val();
+    var anovalidade = $('#anovalidade').val();
+    var cvv = $('#cvv').val();
+    var qtdparcela = $('#qtdparcela').val();
+    var cep = $('#cep').val();
+    var rua = $('#rua').val();
+    var numero = $('#numero').val();
+    var estado = $('#estado').val();
+    var cidade = $('#cidade').val();
+	  
+    /*
+     * Valida cidade.
+     * Se estiver vazia, mostra alerta e interrompe o método.
+     */
+    if(cidade.trim() == ''){
+        alert('Informe a Cidade de cobrança do cartão de crédito.');
+        return;
+    }
+	  
+    /*
+     * Valida estado.
+     */
+    if(estado.trim() == ''){
+        alert('Informe o Estado de cobrança do cartão de crédito.');
+        return;
+    }
+	  
+    /*
+     * Valida número do endereço.
+     */
+    if(numero.trim() == ''){
+        alert('Informe a Número de cobrança do cartão de crédito.');
+        return;
+    }
+	  
+    /*
+     * Valida rua.
+     */
+    if(rua.trim() == ''){
+        alert('Informe a RUA de cobrança do cartão de crédito.');
+        return;
+    }
+	  
+    /*
+     * Valida CEP.
+     */
+    if(cep.trim() == ''){
+        alert('Informe CEP de cobrança do cartão de crédito.');
+        return;
+    }
+	  
+    /*
+     * Valida CVV.
+     */
+    if(cvv.trim() == ''){
+        alert('Informe CVV do cartão de crédito.');
+        return;
+    }
+	  
+    /*
+     * Valida mês de validade.
+     */
+    if(mesvalidade.trim() == ''){
+        alert('Informe mês de válidade do cartão de crédito.');
+        return;
+    }
+	  
+    /*
+     * Valida número do cartão.
+     */
+    if(numerocartao.trim() == ''){
+        alert('Informe o número do cartão de crédito.');
+        return;
+    }
+	  
+    /*
+     * Valida nome impresso no cartão.
+     */
+    if(nomecartao.trim() == ''){
+        alert('Informe o nome como escrito no cartão de crédito.');
+        return;
+    }
+	  
+    /*
+     * Valida CPF do titular.
+     */
+    if(cpf.trim() == ''){
+        alert('Informe cpf do responsável pelo cartão de crédito.');
+        return;
+    }
+	  
+    /**
+     * Objeto que representa os dados principais do cartão.
+     *
+     * @param cardNumber número do cartão sem pontos
+     * @param holderName nome do titular
+     * @param securityCode código CVV
+     * @param expirationMonth mês de validade
+     * @param expirationYear ano de validade
+     */
+    var cardData = {
+        /*
+         * remove os pontos do número do cartão antes de enviar.
+         */
+        cardNumber: numerocartao.replaceAll('.',""),
+        holderName: nomecartao,
+        securityCode: cvv,
+        expirationMonth: mesvalidade,
+        expirationYear: anovalidade
+    };
+	  
+    /*
+     * Validação simples do número do cartão.
+     *
+     * Observação didática:
+     * aqui não existe uma validação real do cartão,
+     * só verifica se não é null.
+     */
+    var isValidCardNumber = cardData.cardNumber !=  null;
+	  
+    if (isValidCardNumber == false){
+        alert('Número do cartão é inválido');
+        return;
+    }
+	  
+    /*
+     * Validação simples do CVV.
+     */
+    var isValidSecurityCode = cardData.cardNumber != null &&  cvv != null;
+	  
+    if (isValidSecurityCode == false){
+        alert('Códivo CVV de segurança é inválido.');
+        return;
+    }
+	  
+    /*
+     * Validação simples da data de validade.
+     */
+    var isValidExpireDate = cardData.expirationMonth != null && cardData.expirationYear != null;
+	  
+    if (isValidExpireDate == false){
+        alert('Data de válidade é inválida');
+        return;
+    }
+	  
+    /*
+     * Verifica se o objeto cardData foi criado.
+     */
+    var isValidCardData =  cardData != null;
+	  
+    /*
+     * Só continua se todas as validações passarem.
+     */
+    if (isValidCardData && isValidExpireDate && isValidSecurityCode && isValidCardNumber){
+		  
+        /*
+         * Desabilita o botão para o usuário não clicar várias vezes
+         * enquanto o pagamento está sendo processado.
+         */
+        document.getElementById('buttonrealizarPagamento').disabled = true;
+        document.getElementById('buttonrealizarPagamento').value = 'Efetuando pagamento...';
+		  
+        /**
+         * Envia os dados para o backend usando AJAX.
+         *
+         * @param method tipo de requisição HTTP
+         * @param url endpoint que receberá os dados
+         * @param data dados enviados para o backend
+         *
+         * <p>Esse endpoint provavelmente está em um controller Spring.</p>
+         */
+        $.ajax({
+            method: 'POST',
+            url: '/lojavirtual/finalizarCompraCartao',
+            data: {
+                cardNumber: cardData.cardNumber,
+                holderName: cardData.holderName,
+                securityCode: cardData.securityCode,
+                expirationMonth: cardData.expirationMonth,
+                expirationYear: cardData.expirationYear,
+                idVendaCampo: idVendaCampo,
+                cpf: cpf,
+                qtdparcela: qtdparcela,
+                cep: cep,
+                rua: rua,
+                numero: numero,
+                estado: estado,
+                cidade: cidade
+            }
+        }).success(function (response) {
+			 
+            /*
+             * Se o backend responder "sucesso",
+             * muda o botão para indicar pagamento concluído.
+             */
+            if (response == 'sucesso') {
+                document.getElementById('buttonrealizarPagamento').disabled = true;
+                document.getElementById('buttonrealizarPagamento').value = 'Sucesso, OK... Pago';   
+            }else {
+				   
+                /*
+                 * Se o backend responder outra mensagem,
+                 * reabilita o botão e mostra o erro.
+                 */
+                document.getElementById('buttonrealizarPagamento').disabled = false;
+                document.getElementById('buttonrealizarPagamento').value = 'Realizar Pagamento';  
+				   
+                alert(response);
+            }
+			   
+        }).fail(function (xhr, status, errorThrown) {
+			   
+            /*
+             * Se a requisição falhar por erro técnico,
+             * reabilita o botão e mostra o motivo do erro.
+             */
+            document.getElementById('buttonrealizarPagamento').disabled = false;
+            document.getElementById('buttonrealizarPagamento').value = 'Realizar Pagamento';   
+			   
+            alert('Erro ao efetuar pagamento: ' + errorThrown);
+            return;
+        });
+		  
+    }else {
+        /*
+         * Caso as validações não permitam continuar,
+         * mostra mensagem final de bloqueio.
+         */
+        alert('O pagamento não pode ser realizado.');
+        return;
+    }
+}      
+
+</script>	
+
+</body>
+</html>

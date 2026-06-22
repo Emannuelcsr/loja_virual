@@ -15,6 +15,51 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
+/**
+ * Entidade usada para o controle interno das cobranças de uma venda no sistema.
+ *
+ * <p>
+ * Apesar do nome "BoletoJuno", esta classe não representa apenas boleto.
+ * Ela funciona como um registro interno de cobrança da venda, podendo guardar
+ * informações de pagamentos gerados por boleto, Pix ou cartão.
+ * </p>
+ *
+ * <p>
+ * Em outras palavras:
+ * a API externa (como Asaas/Juno) é quem cria e processa a cobrança real,
+ * enquanto esta entidade serve para o sistema salvar e controlar os dados
+ * dessa cobrança no banco de dados.
+ * </p>
+ *
+ * <p>
+ * Essa classe pode ser usada para:
+ * </p>
+ * <ul>
+ *   <li>Relacionar a cobrança com uma venda</li>
+ *   <li>Relacionar a cobrança com a empresa</li>
+ *   <li>Guardar código/id da cobrança gerada na API</li>
+ *   <li>Guardar link de pagamento, link de checkout ou link da parcela</li>
+ *   <li>Guardar valor, vencimento e número da parcela</li>
+ *   <li>Controlar internamente se a cobrança foi marcada como quitada</li>
+ *   <li>Armazenar dados de Pix, boleto ou cartão para consulta futura</li>
+ * </ul>
+ *
+ * <p>
+ * Importante:
+ * esta classe é um espelho/controle interno da cobrança.
+ * Ela não é a responsável por cobrar o cliente diretamente.
+ * Quem faz a cobrança real é a API de pagamento.
+ * </p>
+ *
+ * <p>
+ * Observação:
+ * o nome da classe ficou como "BoletoJuno" por questão histórica do projeto,
+ * mas hoje seu uso é mais amplo, servindo como controle de cobrança da venda,
+ * inclusive para cartão e Pix.
+ * </p>
+ */
+
+
 @Entity
 @Table(name = "boleto_juno")
 @SequenceGenerator(name = "seq_boleto_juno", sequenceName = "seq_boleto_juno", allocationSize = 1, initialValue = 1)
@@ -26,40 +71,44 @@ public class BoletoJuno implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_boleto_juno")
 	private Long id;
 
-	/* Código de controle do boleto */
+	/* Código ou identificador da cobrança retornado pela API */
 	private String code = "";
 
-	/* Imprime o boleto completo com todas as parcelas */
+	/* Link direto do boleto, quando existir */
 	private String link;
 
-	/*
-	 * Mostra um telinha de checkout da Juno com os boleto, pix e cartão pagos ou
-	 * vencidos
-	 */
+	/* Link de checkout da cobrança, podendo envolver boleto, Pix ou cartão */
 	private String checkoutUrl = "";
 
+	/* Indica no controle interno se a cobrança foi considerada quitada */
 	private boolean quitado = false;
 
+	/* Data de vencimento da cobrança ou parcela */
 	private String dataVencimento = "";
 
+	/* Valor da cobrança ou da parcela */
 	private BigDecimal valor = BigDecimal.ZERO;
 
+	/* Número sequencial da parcela/recorrência: 1, 2, 3... */
 	private Integer recorrencia = 0;
 
-	/* Id controle do boleto para poder cancelar pela api */
+	/* Id da cobrança para controle interno e possível cancelamento/consulta via API */
 	private String idChrBoleto = "";
 
-	/* Link da parcela do boleto */
+	/* Link individual da parcela, quando existir */
 	private String installmentLink = "";
 
+	/* Id do Pix vinculado à cobrança, quando existir */
 	private String IdPix = "";
 
-	@Column(columnDefinition = "text")
+	/* Payload do QR Code Pix em Base64, quando existir */
 	private String payloadInBase64 = "";
 
+	/* Imagem do QR Code em Base64, quando existir */
 	@Column(columnDefinition = "text")
 	private String imageInBase64 = "";
 
+	/* Id da cobrança de cartão, quando a venda for paga com cartão */
 	private String chargeICartao = "";
 
 	@ManyToOne

@@ -1,8 +1,12 @@
 package jdev.mentoria.lojavirtual.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +21,7 @@ import jdev.mentoria.lojavirtual.ExcepetionLojaVirtual;
 import jdev.mentoria.lojavirtual.model.Acesso;
 import jdev.mentoria.lojavirtual.model.CupomDesconto;
 import jdev.mentoria.lojavirtual.model.MarcaProduto;
+import jdev.mentoria.lojavirtual.model.PessoaJuridica;
 import jdev.mentoria.lojavirtual.repository.CupomDescontoRepository;
 
 @RestController
@@ -81,4 +86,31 @@ public class CupomDescontoController {
 		return new ResponseEntity<CupomDesconto>(cupomDesconto, HttpStatus.OK);
 	}
 
+	
+	
+	@GetMapping(value = "/listaPorPageCupons/{codEmp}/{pagina}")
+	public ResponseEntity<List<CupomDesconto>> listaPorPageCupons(@PathVariable("codEmp") Long codEmp,
+			@PathVariable("pagina") Integer pagina) {
+
+		org.springframework.data.domain.Pageable pageable = PageRequest.of(pagina - 1, 5, Sort.by("codDescricao"));
+
+		List<CupomDesconto> lista = cupomDescontoRepository.findbyPage(codEmp, pageable);
+
+		return new ResponseEntity<List<CupomDesconto>>(lista, HttpStatus.OK);
+	}
+	
+	
+	
+	@GetMapping(value = "/qtdadePaginaCupons/{codEmp}")
+	public ResponseEntity<Map<String, Integer>> qtdadePaginaCupons(@PathVariable("codEmp") Long codEmp) {
+
+		Integer qtdadePagina = cupomDescontoRepository.quantidadePagina(codEmp);
+
+		Map<String, Integer> resposta = new HashMap<>();
+
+		resposta.put("resposta", qtdadePagina);
+
+		return new ResponseEntity<Map<String, Integer>>(resposta, HttpStatus.OK);
+	}
+	
 }

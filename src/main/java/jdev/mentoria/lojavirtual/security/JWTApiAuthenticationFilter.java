@@ -92,41 +92,34 @@ public class JWTApiAuthenticationFilter extends GenericFilterBean {
 		// (Authorization, etc.)
 		HttpServletRequest req = (HttpServletRequest) request;
 
+		System.out.println("=========== PASSOU PELO JWT API FILTER =========== " + req.getRequestURI());
+		
+
 		// Converte o response genérico para HttpServletResponse para permitir o serviço
 		// escrever resposta se precisar
 		HttpServletResponse res = (HttpServletResponse) response;
 
 		try {
 
-			// ------------------------------------------------------------
-			// Tenta obter um usuário autenticado a partir do token JWT
-			// ------------------------------------------------------------
-
-			// Pede para o serviço validar o token e retornar um Authentication pronto (ou
-			// null se não tiver token/for inválido)
 			Authentication authentication = jwtService.getAuthentication(res, req);
 
-			// Se a autenticação foi montada com sucesso, registra no contexto de segurança
-			// do Spring
 			if (authentication != null) {
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
 
-			// ------------------------------------------------------------
-			// Continua o fluxo normal da requisição (próximo filtro / controller)
-			// ------------------------------------------------------------
 			chain.doFilter(request, response);
+
 		} catch (io.jsonwebtoken.security.SignatureException e) {
 			response.getWriter().write("Token esta invalido");
 
 		} catch (io.jsonwebtoken.ExpiredJwtException e) {
 			response.getWriter().write("Token esta expirado");
+
 		} catch (Exception e) {
 
 			e.printStackTrace();
 			response.getWriter().write("Ocorreu um erro no sistema. Avise o administrador \n" + e.getMessage());
 		}
-
 	}
 
 	/*

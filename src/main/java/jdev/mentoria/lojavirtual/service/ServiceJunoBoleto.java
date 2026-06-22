@@ -24,9 +24,12 @@ import jdev.mentoria.lojavirtual.ApiTokenIntegracao;
 import jdev.mentoria.lojavirtual.model.AcessTokenJunoAPI;
 import jdev.mentoria.lojavirtual.model.BoletoJuno;
 import jdev.mentoria.lojavirtual.model.VendaCompraLojaVirtual;
+import jdev.mentoria.lojavirtual.model.dto.AsaasApiPagamentoStatus;
 import jdev.mentoria.lojavirtual.model.dto.BoletoGeradoApiJuno;
+import jdev.mentoria.lojavirtual.model.dto.CobrancaApiAsaas;
 import jdev.mentoria.lojavirtual.model.dto.CobrancaJunoAPI;
 import jdev.mentoria.lojavirtual.model.dto.ConteudoBoletoJuno;
+import jdev.mentoria.lojavirtual.model.dto.CriarWebHook;
 import jdev.mentoria.lojavirtual.model.dto.ObjetoPostCarneJuno;
 import jdev.mentoria.lojavirtual.repository.AccesTokenJunoRepository;
 import jdev.mentoria.lojavirtual.repository.BoletoJunoRepository;
@@ -34,6 +37,8 @@ import jdev.mentoria.lojavirtual.repository.Vd_cp_Loja_virtual_Repository;
 
 @Service
 public class ServiceJunoBoleto implements Serializable {
+
+    private final ServiceAsaasBoleto serviceAsaasBoleto;
 
 	private static final long serialVersionUID = 1L;
 
@@ -48,6 +53,10 @@ public class ServiceJunoBoleto implements Serializable {
 
 	@Autowired
 	private BoletoJunoRepository boletoJunoRepository;
+
+    ServiceJunoBoleto(ServiceAsaasBoleto serviceAsaasBoleto) {
+        this.serviceAsaasBoleto = serviceAsaasBoleto;
+    }
 
 	/**
 	 * Obtém um token de acesso válido da API da Juno para ser utilizado nas
@@ -272,6 +281,46 @@ public class ServiceJunoBoleto implements Serializable {
 
 	}
 
+	public String gerarCarneApiAsaas(ObjetoPostCarneJuno objetoPostCarneJuno ) throws Exception {
+		
+		VendaCompraLojaVirtual vendaCompraLojaVirtual = vd_Cp_Loja_virt_repository
+				.findById(objetoPostCarneJuno.getIdVenda()).get();
+	
+		CobrancaApiAsaas cobrancaApiAsaas = new CobrancaApiAsaas();
+		
+		cobrancaApiAsaas.setCustomer(serviceAsaasBoleto.buscaClientePessoaApiAssas(objetoPostCarneJuno));
+		
+		//pix, boleto ou UNDEFINED 
+		cobrancaApiAsaas.setBillingType("UNDEFINED");//( gera boleto e pix) 
+		cobrancaApiAsaas.setDescription("Pix ou boleto gerado para cobranca:" + vendaCompraLojaVirtual.getId() );
+		cobrancaApiAsaas.setInstallmentValue(vendaCompraLojaVirtual.getValorTotal().floatValue());
+		cobrancaApiAsaas.setInstallmentCount(1);//quantidade de parcelas
+		
+		
+		Calendar dataVencimento = Calendar.getInstance();// pega data atual, armaneza em datavencimento
+		dataVencimento.add(Calendar.DAY_OF_MONTH, 7);// adicionando 7 dias do mes a data vencimento
+		cobrancaApiAsaas.setDueDate(new SimpleDateFormat("yyyy-MM-dd").format(dataVencimento.getTime()));// formatando conforme a documentação pede
+		
+		cobrancaApiAsaas.getInterest().setValue(1F);
+		
+		cobrancaApiAsaas.getFine().setValue(1F);
+		
+		String json = new ObjectMapper().writeValueAsString(cobrancaApiAsaas);// converte o objeto para JSON
+		
+		
+		Client client = new HostIgnoreClient(AsaasApiPagamentoStatus.URL_API_ASAAS_SANDBOX).hostIgnoreClient();// por causa do https pra nao gerar erro de acesso
+		
+		WebResource webResource = client.resource(AsaasApiPagamentoStatus.URL_API_ASAAS_SANDBOX + "payments");
+		
+		
+		return "";
+		
+		
+	}
+	
+	
+	
+	
 	/*
 	 * Método que gera o PIX e Boleto com a API da Juno/Ebanx
 	 */
@@ -373,30 +422,85 @@ public class ServiceJunoBoleto implements Serializable {
 		}
 
 	}
-	
+
 	public String cancelarBoleto(String code) throws Exception {
-		
+
 		AcessTokenJunoAPI accessTokenJunoAPI = this.obterTokenApiJuno();
-		
+
 		Client client = new HostIgnoreClient("https://api.juno.com.br/").hostIgnoreClient();
-		WebResource webResource = client.resource("https://api.juno.com.br/charges/"+code+"/cancelation");
-		
-		ClientResponse clientResponse = webResource.accept(MediaType.APPLICATION_JSON)
-				.header("X-Api-Version", 2)
+		WebResource webResource = client.resource("https://api.juno.com.br/charges/" + code + "/cancelation");
+
+		ClientResponse clientResponse = webResource.accept(MediaType.APPLICATION_JSON).header("X-Api-Version", 2)
 				.header("X-Resource-Token", ApiTokenIntegracao.TOKEN_PRIVATE_JUNO)
-				.header("Authorization", "Bearer " + accessTokenJunoAPI.getAcess_token())
-				.put(ClientResponse.class);
-		
+				.header("Authorization", "Bearer " + accessTokenJunoAPI.getAcess_token()).put(ClientResponse.class);
+
 		if (clientResponse.getStatus() == 204) {
-			
+
 			boletoJunoRepository.deleteByCode(code);
-			
+
 			return "Cancelado com sucesso";
 		}
-		
+
 		return clientResponse.getEntity(String.class);
+
+	}
+
+	public String criarWebHook(CriarWebHook criarWebHook) throws Exception {
+
+		AcessTokenJunoAPI accessTokenJunoAPI = this.obterTokenApiJuno();
+
+		Client client = new HostIgnoreClient("https://api.juno.com.br/").hostIgnoreClient();
+		WebResource webResource = client.resource("https://api.juno.com.br/notifications/webhooks");
+
+		String json = new ObjectMapper().writeValueAsString(criarWebHook);
+
+		ClientResponse clientResponse = webResource.accept("application/json;charset=UTF-8")
+				.header("Content-Type", "application/json").header("X-API-Version", 2)
+				.header("X-Resource-Token", ApiTokenIntegracao.TOKEN_PRIVATE_JUNO)
+				.header("Authorization", "Bearer " + accessTokenJunoAPI.getAcess_token())
+				.post(ClientResponse.class, json);
+
+		String resposta = clientResponse.getEntity(String.class);
+		clientResponse.close();
+
+		return resposta;
+
+	}
+
+	public String listaWebHook() throws Exception {
+
+		AcessTokenJunoAPI accessTokenJunoAPI = this.obterTokenApiJuno();
+
+		Client client = new HostIgnoreClient("https://api.juno.com.br/").hostIgnoreClient();
+		WebResource webResource = client.resource("https://api.juno.com.br/notifications/webhooks");
+
+		ClientResponse clientResponse = webResource.accept("application/json;charset=UTF-8")
+				.header("Content-Type", "application/json").header("X-API-Version", 2)
+				.header("X-Resource-Token", ApiTokenIntegracao.TOKEN_PRIVATE_JUNO)
+				.header("Authorization", "Bearer " + accessTokenJunoAPI.getAcess_token()).get(ClientResponse.class);
+
+		String resposta = clientResponse.getEntity(String.class);
+
+		return resposta;
+
+	}
+
+	public void deleteWebHook(String idWebHook) throws Exception {
+		
+	    AcessTokenJunoAPI accessTokenJunoAPI = this.obterTokenApiJuno();
+		
+		Client client = new HostIgnoreClient("https://api.juno.com.br/").hostIgnoreClient();
+		WebResource webResource = client.resource("https://api.juno.com.br/notifications/webhooks/" + idWebHook);
+		
+		webResource
+				.accept("application/json;charset=UTF-8")
+				.header("Content-Type", "application/json")
+				.header("X-API-Version", 2)
+				.header("X-Resource-Token", ApiTokenIntegracao.TOKEN_PRIVATE_JUNO)
+				.header("Authorization", "Bearer " + accessTokenJunoAPI.getAcess_token())
+				.delete();
+		
 		
 	}
 	
-
 }
